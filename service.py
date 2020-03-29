@@ -13,7 +13,6 @@ import pymongo
 #import json
 import re
 import configparser
-from pathlib import Path
 import pprint
 #import classify
 #Reference Video
@@ -21,14 +20,12 @@ import pprint
 
 app = Flask(__name__)
 
-#Get the HOME
-home = str(Path.home())
+
 #Read the config file
-configFile = 'config.ini'
-#So the path is always "$HOME/config.ini
-cpath = home + "/" + configFile
+configFile = '/var/www/votesapp-rest/config.ini'
+
 config = configparser.ConfigParser()
-config.read(cpath)
+config.read(configFile)
 
 
 #PySQL configurations
