@@ -14,7 +14,6 @@ from flask_pymongo import PyMongo
 import pymongo
 #import json
 import re
-#from datetime import datetime
 import pprint
 #import classify
 #Reference Video
