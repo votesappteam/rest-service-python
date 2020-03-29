@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
-#from sqlalchemy.sql.expression import BinaryExpression, func, literal
-#import uuid
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -14,6 +12,8 @@ from flask_pymongo import PyMongo
 import pymongo
 #import json
 import re
+import configparser
+from pathlib import Path
 import pprint
 #import classify
 #Reference Video
@@ -21,22 +21,26 @@ import pprint
 
 app = Flask(__name__)
 
+#Get the HOME
+home = str(Path.home())
+#Read the config file
+configFile = 'config.ini'
+#So the path is always "$HOME/config.ini
+cpath = home + "/" + configFile
+config = configparser.ConfigParser()
+config.read(cpath)
+
 
 #PySQL configurations
-userpass = 'mysql+pymysql://webuser:sindhu123$@'
+
+userpass = config['MYSQLDB']['USERPASS']
 basedir  = '127.0.0.1'
-# change to YOUR database name, with a slash added as shown
 dbname   = '/votesapp_db'
-# this socket is going to be very different on a Windows computer
-socket   = '?unix_socket=/tmp/mysql.sock'  #Mac mini Dev
-#socket   = '?unix_socket=/var/run/mysqld/mysqld.sock'  #Ubuntu
+socket = config['MYSQLDB']['SOCKET']
 dbname   = dbname + socket
 
 
-app.config['SECRET_KEY'] = 'thisissecret'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://webuser:sindhu123$@localhost/votesapp_db'
-#app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://webuser:sindhu123$@localhost:3306/votesapp_db"
-# put them all together as a string that shows SQLAlchemy where the database is
+app.config['SECRET_KEY'] = config['SECURITY']['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = userpass + basedir + dbname
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
