@@ -133,20 +133,19 @@ def token_required(f):
 
 
 
-@app.route('/api/questions/get/<question_txt>', methods=['GET'])
+@app.route('/api/questions/get', methods=['GET'])
 @token_required
-def get_one_user(current_user, question_txt):
+def get_one_user(current_user):
 
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
-
-    #user = User.query.filter_by(public_id=question_txt).first()
-    #question_results = Questions.query.whoosh_search(question_txt).order_by(Questions.posted_dt.desc()).all
+    data = request.get_json()
+    question_txt = data['search_str']
     search_str = "%{}%".format(question_txt)
     question_results = Questions.query.filter(Questions.question.like(search_str)).order_by(Questions.posted_dt.desc()).all()
 
     if not question_results:
-        return jsonify({'message' : 'No question found!'})
+        return jsonify({'message' : 'No question found!'}), 204
 
     output = []
 
