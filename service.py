@@ -233,20 +233,19 @@ def login():
 ############# PULSE Requests ##########################
 
 
-@app.route('/api/pulse/get', methods=['GET'])
+@app.route('/api/pulse/get/<pulse_text>', methods=['GET'])
 @token_required
-def search_pulse(current_user):
+def search_pulse(current_user, pulse_text):
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
-    data = request.get_json()
-    pulse_text = data['search_str']
+
     search_str = "%{}%".format(pulse_text)
 
     pulse_results = Pulse.query.filter(or_(Pulse.pulse_type_name.like(search_str), Pulse.pulse_type_name_native.like(search_str) , Pulse.pulse_type_name_short.like(search_str))).order_by(
         Pulse.posted_dt.desc())
 
     if pulse_results.count() == 0:
-        return jsonify({'message': 'No pulse found!'}), 204
+        return jsonify({'message': 'No pulse found!'})
 
 
     output = []
@@ -320,19 +319,18 @@ def delete_pulse(current_user, pulse_id):
     return jsonify({'message': 'The pulse has been deleted!'})
 
 #Locations search for posting questions
-@app.route('/api/locations/get', methods=['GET'])
+@app.route('/api/locations/get/<search_txt>', methods=['GET'])
 @token_required
-def get_locations(current_user):
+def get_locations(current_user, search_txt):
 
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
-    data = request.get_json()
-    search_txt = data['search_str']
+
     search_str = "%{}%".format(search_txt)
     location_results = Locations.query.filter(or_(Locations.c0.like(search_str),Locations.c2.contains(search_str),Locations.c4.like(search_str),Locations.c5.like(search_str),Locations.c6.like(search_str))).order_by(Locations.c0)
 
     if location_results.count() == 0:
-        return jsonify({'message': 'No locations found!'}), 204
+        return jsonify({'message': 'No locations found!'})
 
     output = []
     getlocation = set()  # Set is remove the duplicate locations
@@ -363,20 +361,18 @@ def get_locations(current_user):
 
 
 #Locations search for changing locations in the settings-->Profile
-@app.route('/api/locations/get/profile', methods=['GET'])
+@app.route('/api/locations/get/profile/<search_txt>', methods=['GET'])
 @token_required
-def get_profile_locations(current_user):
+def get_profile_locations(current_user, search_txt):
 
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
 
-    data = request.get_json()
-    search_txt = data['search_str']
     search_str = "%{}%".format(search_txt)
     location_results = Locations.query.filter(or_(Locations.c0.like(search_str),Locations.c2.contains(search_str),Locations.c4.like(search_str),Locations.c5.like(search_str),Locations.c6.like(search_str))).order_by(Locations.c0)
 
     if not location_results:
-        return jsonify({'message' : 'No locations found!'}), 204
+        return jsonify({'message' : 'No locations found!'})
 
     output = []
 
