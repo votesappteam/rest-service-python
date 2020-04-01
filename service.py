@@ -146,7 +146,7 @@ def get_one_user(current_user, question_txt):
     question_results = Questions.query.filter(Questions.question.like(search_str)).order_by(Questions.posted_dt.desc()).all()
 
     if not question_results:
-        return jsonify({'message' : 'No question found!'})
+        return jsonify({'message' : 'No question found!'}), 204
 
     output = []
 
@@ -188,7 +188,7 @@ def promote_user(current_user, question_id):
     question = Questions.query.filter_by(qid=question_id).first()
 
     if not question:
-        return jsonify({'message' : 'No question found to update!'})
+        return jsonify({'message' : 'No question found to update!'}), 204
 
     question.active = False
     db.session.commit()
@@ -204,7 +204,7 @@ def delete_user(current_user, question_id):
     question = Questions.query.filter_by(qid=question_id).first()
 
     if not question:
-        return jsonify({'message' : 'No question found to delete!'})
+        return jsonify({'message' : 'No question found to delete!'}), 204
 
     db.session.delete(question)
     db.session.commit()
@@ -246,7 +246,7 @@ def search_pulse(current_user, pulse_text):
         Pulse.posted_dt.desc())
 
     if pulse_results.count() == 0:
-        return jsonify({'message': 'No pulse found!'})
+        return jsonify({'message': 'No pulse found!'}), 204
 
 
     output = []
@@ -296,7 +296,7 @@ def update_pulse(current_user, pulse_id):
     pulse = Pulse.query.filter_by(pid=pulse_id).first()
 
     if not pulse:
-        return jsonify({'message': 'No pulse found to update!'})
+        return jsonify({'message': 'No pulse found to update!'}), 204
 
     pulse.active = False
     db.session.commit()
@@ -312,7 +312,7 @@ def delete_pulse(current_user, pulse_id):
     pulse = Pulse.query.filter_by(pid=pulse_id).first()
 
     if not pulse:
-        return jsonify({'message': 'No pulse found to delete!'})
+        return jsonify({'message': 'No pulse found to delete!'}), 204
 
     db.session.delete(pulse)
     db.session.commit()
@@ -331,7 +331,7 @@ def get_locations(current_user, search_txt):
     location_results = Locations.query.filter(or_(Locations.c0.like(search_str),Locations.c2.contains(search_str),Locations.c4.like(search_str),Locations.c5.like(search_str),Locations.c6.like(search_str))).order_by(Locations.c0)
 
     if location_results.count() == 0:
-        return jsonify({'message': 'No locations found!'})
+        return jsonify({'message': 'No locations found!'}), 204
 
     output = []
     getlocation = set()  # Set is remove the duplicate locations
@@ -373,7 +373,7 @@ def get_profile_locations(current_user, search_txt):
     location_results = Locations.query.filter(or_(Locations.c0.like(search_str),Locations.c2.contains(search_str),Locations.c4.like(search_str),Locations.c5.like(search_str),Locations.c6.like(search_str))).order_by(Locations.c0)
 
     if not location_results:
-        return jsonify({'message' : 'No locations found!'})
+        return jsonify({'message' : 'No locations found!'}), 204
 
     output = []
 
@@ -401,7 +401,7 @@ def get_locations_mongo(current_user, search_txt):
     #db.stores.find({ $text: { $search: "java coffee shop"}} )
 
     if not location:
-        return jsonify({'message': 'No locations found!'})
+        return jsonify({'message': 'No locations found!'}), 204
     output = []
     for loc in location:
         data = {}
