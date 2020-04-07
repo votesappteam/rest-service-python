@@ -348,17 +348,17 @@ def get_locations(current_user, search_txt):
 
     # If users search the zipcode, display until the subdistrict
         if search_txt in lr.c2.lower():
-            getlocation.add(lr.c0+"→"+lr.c4+"→"+lr.c5+"→"+lr.c6)
-
+            #getlocation.add(lr.c0+"→"+lr.c4+"→"+lr.c5+"→"+lr.c6)
+            getlocation.add(lr.c6+"→"+lr.c5+"→"+lr.c4+"→"+lr.c0)
         if search_txt in lr.c4.lower():
-            getlocation.add(lr.c0+"→"+lr.c4)
-
+            #getlocation.add(lr.c0+"→"+lr.c4)
+            getlocation.add(lr.c4+"→"+lr.c0)
         if search_txt in lr.c5.lower():
-            getlocation.add(lr.c0+"→"+lr.c4+"→"+lr.c5)
-
+            #getlocation.add(lr.c0+"→"+lr.c4+"→"+lr.c5)
+            getlocation.add(lr.c5+"→"+lr.c4+"→"+lr.c0)
         if search_txt in lr.c6.lower():
-            getlocation.add(lr.c0+"→"+lr.c4+"→"+lr.c5+"→"+lr.c6)
-
+            #getlocation.add(lr.c0+"→"+lr.c4+"→"+lr.c5+"→"+lr.c6)
+            getlocation.add(lr.c6+"→"+lr.c5+"→"+lr.c4+"→"+lr.c0)
     for item in getlocation:
         data = {}
         data['locstr'] = item
