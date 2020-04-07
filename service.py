@@ -82,6 +82,7 @@ class Questions(db.Model):
     active = db.Column(db.Boolean)
     photo_URL = db.Column(db.String(200))
     urlstring = db.Column(db.String(50))
+    tagstring = db.Column(db.String(25))
 
 class Pulse(db.Model):
     __tablename__ = 'pulse'
@@ -143,7 +144,10 @@ def get_one_user(current_user, question_txt):
     #user = User.query.filter_by(public_id=question_txt).first()
     #question_results = Questions.query.whoosh_search(question_txt).order_by(Questions.posted_dt.desc()).all
     search_str = "%{}%".format(question_txt)
-    question_results = Questions.query.filter(Questions.question.like(search_str)).order_by(Questions.posted_dt.desc()).all()
+    #question_results = Questions.query.filter(Questions.question.like(search_str)).order_by(Questions.posted_dt.desc()).all()
+    question_results = Questions.query.filter(
+        or_(Questions.question.like(search_str), Questions.tagstring.like(search_str))).order_by(
+        Questions.posted_dt.desc()).all()
 
     if not question_results:
         return jsonify({'message' : 'No question found!'}), 204
@@ -159,6 +163,7 @@ def get_one_user(current_user, question_txt):
         data['posted_by'] = qr.posted_by
         data['photo_URL'] = qr.photo_URL
         data['urlstring'] = qr.urlstring
+        data['tagstring'] = qr.tagstring
         output.append(data)
 
     return jsonify({'questions': output})
@@ -173,7 +178,7 @@ def create_user(current_user):
 
     #hashed_password = generate_password_hash(data['password'], method='sha256')
 
-    new_question = Questions(qid=data['qid'], question=data['question'], posted_dt=datetime.datetime.utcnow(), category=data['category'],posted_by=data['posted_by'],photo_URL=data['photo_URL'],active=data['active'],urlstring=data['urlstring'])
+    new_question = Questions(qid=data['qid'], question=data['question'], posted_dt=datetime.datetime.utcnow(), category=data['category'],posted_by=data['posted_by'],photo_URL=data['photo_URL'],active=data['active'],urlstring=data['urlstring'],tagstring=data['tagstring'])
     db.session.add(new_question)
     db.session.commit()
 
