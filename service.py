@@ -389,7 +389,33 @@ def get_profile_locations(current_user, search_txt):
 
     return jsonify({'locations': output})
 
+#Locations search for changing locations in the settings-->Profile
+@app.route('/api/locations/get/profile/gps/<search_txt>', methods=['GET'])
+@token_required
+def get_gps_locations(current_user, search_txt):
 
+    if not current_user.active:
+        return jsonify({'message' : 'Cannot perform that function!'})
+    splitStr = search_txt.split('|')
+    zipStr = splitStr[0]
+    countryStr = splitStr[1]
+    search_str = "%{}%".format(zipStr)
+    location_results = Locations.query.filter(Locations.c0 == countryStr,Locations.c2.contains(search_str)).first()
+
+    if not location_results:
+        return jsonify({'message' : 'No locations found!'}), 204
+
+    output = []
+
+
+    data = {}
+    data['country'] = location_results.c0
+    data['state'] = location_results.c4
+    data['district'] = location_results.c5
+    data['subdistrict'] = location_results.c6
+    output.append(data)
+
+    return jsonify({'locations': output})
 
 #Locations search with mongo
 @app.route('/api/locations-mongo/get/<search_txt>', methods=['GET'])
