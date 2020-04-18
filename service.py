@@ -141,11 +141,10 @@ def get_one_user(current_user, question_txt):
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
 
-    #user = User.query.filter_by(public_id=question_txt).first()
-    #question_results = Questions.query.whoosh_search(question_txt).order_by(Questions.posted_dt.desc()).all
     search_str = "%{}%".format(question_txt)
     #question_results = Questions.query.filter(Questions.question.like(search_str)).order_by(Questions.posted_dt.desc()).all()
-    question_results = Questions.query.filter(
+    #Filter and search questions. The query returns only the question is active
+    question_results = Questions.query.filter(Questions.active == True,
         or_(Questions.question.like(search_str), Questions.tagstring.like(search_str))).order_by(
         Questions.posted_dt.desc()).all()
 
@@ -184,18 +183,20 @@ def create_user(current_user):
 
     return jsonify({'message' : 'New question created!'})
 
-@app.route('/api/questions/update/<question_id>', methods=['PUT'])
+@app.route('/api/questions/update', methods=['PUT'])
 @token_required
-def promote_user(current_user, question_id):
+def promote_user(current_user):
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
-
+    data = request.get_json()
+    question_id = data['qid']
+    action = data['action']
     question = Questions.query.filter_by(qid=question_id).first()
 
     if not question:
         return jsonify({'message' : 'No question found to update!'}), 204
 
-    question.active = False
+    question.active = action
     db.session.commit()
 
     return jsonify({'message' : 'The question has been updated!'})
