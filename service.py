@@ -98,7 +98,8 @@ class Pulse(db.Model):
     posted_by = db.Column(db.Integer)
     active = db.Column(db.Boolean)
     photo_URL = db.Column(db.String(200))
-
+    urlstring = db.Column(db.String(50))
+    tagstring = db.Column(db.String(25))
 
 class Locations(db.Model):
 
@@ -136,7 +137,7 @@ def token_required(f):
 
 @app.route('/api/questions/get/<question_txt>', methods=['GET'])
 @token_required
-def get_one_user(current_user, question_txt):
+def get_question(current_user, question_txt):
 
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
@@ -169,7 +170,7 @@ def get_one_user(current_user, question_txt):
 
 @app.route('/api/questions/post', methods=['POST'])
 @token_required
-def create_user(current_user):
+def create_question(current_user):
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
 
@@ -269,6 +270,8 @@ def search_pulse(current_user, pulse_text):
         pulse_data['posted_by'] = pr.posted_by
         pulse_data['active'] = pr.active
         pulse_data['photo_URL'] = pr.photo_URL
+        pulse_data['urlstring'] = pr.urlstring
+        pulse_data['tagstring'] = pr.tagstring
         output.append(pulse_data)
 
     return jsonify({'Pulse': output})
@@ -287,24 +290,26 @@ def create_pulse(current_user):
                          pulse_type_name_native=data['pulse_type_name_native'],
                          pulse_type_name_short=data['pulse_type_name_short'], posted_dt=datetime.datetime.utcnow(),
                          category=data['category'], posted_by=data['posted_by'], photo_URL=data['photo_URL'],
-                         active=data['active'])
+                         active=data['active'],urlstring=data['urlstring'],tagstring=data['tagstring'])
     db.session.add(new_pulse)
     db.session.commit()
 
     return jsonify({'message': 'New pulse created!'})
 
-@app.route('/api/pulse/update/<pulse_id>', methods=['PUT'])
+@app.route('/api/pulse/update', methods=['PUT'])
 @token_required
-def update_pulse(current_user, pulse_id):
+def update_pulse(current_user):
     if not current_user.active:
         return jsonify({'message': 'Cannot perform that function!'})
-
+    data = request.get_json()
+    pulse_id = data['pid']
+    action = data['action']
     pulse = Pulse.query.filter_by(pid=pulse_id).first()
 
     if not pulse:
         return jsonify({'message': 'No pulse found to update!'}), 204
 
-    pulse.active = False
+    pulse.active = action
     db.session.commit()
 
     return jsonify({'message': 'The pulse has been updated!'})
