@@ -78,6 +78,38 @@ class edit_pulse_requests(db.Model):
     approved_date = db.Column(db.DateTime)
     pid = db.Column(db.String(100))
 
+class new_pulse_requests(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(45))
+    type_name = db.Column(db.String(300))
+    type_name_native = db.Column(db.String(300))
+    type_short_name = db.Column(db.String(45))
+    urlstring = db.Column(db.String(45))
+    active = db.Column(db.Boolean)
+    active_changed_dt = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    brand_id = db.Column(db.Integer)
+    category = db.Column(db.String(100))
+    claimed = db.Column(db.Boolean)
+    country = db.Column(db.String(100))
+    geo = db.Column(db.String(100))
+    last_reset_date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    last_updated_date = db.Column(db.DateTime)
+    official_email = db.Column(db.String(150))
+    official_website = db.Column(db.String(300))
+    posted_by_dt = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    posted_by_user = db.Column(db.String(300))
+    pulse_id = db.Column(db.Integer)
+    state = db.Column(db.String(100))
+    tag = db.Column(db.String(45))
+
+# static list of categories and types(sub categories)
+class pulse_category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50))
+    type = db.Column(db.String(45))
+    status = db.Column(db.Boolean)
+
+
 
 def token_required(f):
     @wraps(f)
@@ -117,10 +149,33 @@ def check_requestr(current_user,check_pid):
         output.append(data)
 
     return jsonify({'results': output})
+#get the list of categories and sub categories(type) when a user click on post pulse/brand in the app
+@app.route('/static/category', methods=['GET'])
+@token_required
+def get_category(current_user):
+    if not current_user.active:
+        return jsonify({'message': 'Cannot perform that function!'})
+
+    categories = pulse_category.query.filter(pulse_category.status == True)
+
+    if categories.count() == 0:
+        return jsonify({'message': 'Category not found!'}), 204
+
+
+    output = []
+    for cat in categories:
+        data = {}
+        #data['categories'] = {"id": cat.id, "category":cat.category, "type":cat.type}
+        data['id'] = cat.id
+        data['category'] = cat.category
+        data['type'] = cat.type
+        output.append(data)
+
+    return jsonify({'results': output})
 
 @app.route('/requests/edit', methods=['POST'])
 @token_required
-def edit_requestr(current_user):
+def edit_requests(current_user):
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
 
@@ -132,10 +187,24 @@ def edit_requestr(current_user):
 
     return jsonify({'message' : 'New pulse edit request created!'})
 
+@app.route('/requests/create', methods=['POST'])
+@token_required
+def create_requests(current_user):
+    if not current_user.active:
+        return jsonify({'message' : 'Cannot perform that function!'})
+
+    data = request.get_json()
+
+    create_request = new_pulse_requests(type=data['type'],type_name=data['type_name'],type_name_native=data['type_name_native'],active_changed_dt=datetime.datetime.utcnow(),brand_id=data['brand_id'],category=data['category'],claimed=data['claimed'],country=data['country'],geo=data['geo'],last_reset_date=datetime.datetime.utcnow(),last_updated_date=datetime.datetime.utcnow(),official_email=data['official_email'],official_website=data['official_website'],posted_by_dt=datetime.datetime.utcnow(),posted_by_user=data['posted_by_user'],pulse_id=data['pulse_id'],state=data['state'],tag=data['tag'])
+    db.session.add(create_request)
+    db.session.commit()
+
+    return jsonify({'message' : 'New pulse request created!'})
+
+
 @app.route('/login')
 def login():
     auth = request.authorization
-
     if not auth or not auth.username or not auth.password:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
@@ -150,7 +219,6 @@ def login():
         return jsonify({'token' : token.decode('UTF-8')})
 
     return make_response('Could not verify: Invalid user password', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
 
 if __name__ == '__main__':
     app.run(debug=True)
