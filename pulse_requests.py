@@ -77,7 +77,7 @@ class edit_pulse_requests(db.Model):
     requested_date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     approved_date = db.Column(db.DateTime)
     pid = db.Column(db.String(100))
-
+    
 class new_pulse_requests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(45))
@@ -101,6 +101,22 @@ class new_pulse_requests(db.Model):
     pulse_id = db.Column(db.Integer)
     state = db.Column(db.String(100))
     tag = db.Column(db.String(45))
+
+
+class new_brand_requests(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    brandtype = db.Column(db.String(45))
+    branddescription = db.Column(db.String(300))
+    brandname = db.Column(db.String(70))
+    brandcategory = db.Column(db.String(45))
+    active = db.Column(db.Boolean)
+    brand_id = db.Column(db.String(45))
+    claimed = db.Column(db.Boolean)
+    posted_by_dt = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    status_change_dt = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    posted_by_user = db.Column(db.String(300))
+    decision = db.Column(db.String(15))
+    decision_reason = db.Column(db.String(100))
 
 # static list of categories and types(sub categories)
 class pulse_category(db.Model):
@@ -187,9 +203,9 @@ def edit_requests(current_user):
 
     return jsonify({'message' : 'New pulse edit request created!'})
 
-@app.route('/requests/create', methods=['POST'])
+@app.route('/requests/create/pulse', methods=['POST'])
 @token_required
-def create_requests(current_user):
+def create_pulse_requests(current_user):
     if not current_user.active:
         return jsonify({'message' : 'Cannot perform that function!'})
 
@@ -201,6 +217,20 @@ def create_requests(current_user):
 
     return jsonify({'message' : 'New pulse request created!'})
 
+@app.route('/requests/create/brand', methods=['POST'])
+@token_required
+def create_brand_requests(current_user):
+    if not current_user.active:
+        return jsonify({'message' : 'Cannot perform that function!'})
+
+    data = request.get_json()
+
+    create_request = new_brand_requests(
+brandtype=data['brandtype'],branddescription=data['branddescription'],brandname=data['brandname'],brandcategory=data['brandcategory'],active=data['active'],brand_id=data['brand_id'],claimed=data['claimed'],posted_by_dt=datetime.datetime.utcnow(),status_change_dt=datetime.datetime.utcnow(),posted_by_user=data['posted_by_user'],decision=data['decision'],decision_reason=['decision_reason'])
+    db.session.add(create_request)
+    db.session.commit()
+
+    return jsonify({'message' : 'New pulse request created!'})
 
 @app.route('/login')
 def login():
