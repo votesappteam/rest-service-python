@@ -14,13 +14,17 @@ import re
 import configparser
 import pprint
 
+#Firebase related
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
 app = Flask(__name__)
 
 
 #Read the config file
 configFile = '/var/www/votesapp-rest/config.ini'
-
+firebase_key = '/var/www/votesapp-rest/testvotes-d4cd7-firebase-adminsdk-oqlux-66b40b5463.json'
 config = configparser.ConfigParser()
 config.read(configFile)
 
@@ -56,9 +60,15 @@ def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+# Use a service account
+cred = credentials.Certificate(firebase_key)
+firebase_admin.initialize_app(cred)
+
+fire_db = firestore.client()
+#https://firebase.google.com/docs/firestore/quickstart#python
+
+
 db = SQLAlchemy(app)
-
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
@@ -109,6 +119,8 @@ class new_brand_requests(db.Model):
     branddescription = db.Column(db.String(300))
     brandname = db.Column(db.String(70))
     brandcategory = db.Column(db.String(45))
+    brandemail = db.Column(db.String(150))
+    brandwebpage = db.Column(db.String(250))
     active = db.Column(db.Boolean)
     brand_id = db.Column(db.String(45))
     claimed = db.Column(db.Boolean)
@@ -226,11 +238,90 @@ def create_brand_requests(current_user):
     data = request.get_json()
 
     create_request = new_brand_requests(
-brandtype=data['brandtype'],branddescription=data['branddescription'],brandname=data['brandname'],brandcategory=data['brandcategory'],active=data['active'],brand_id=data['brand_id'],claimed=data['claimed'],posted_by_dt=datetime.datetime.utcnow(),status_change_dt=datetime.datetime.utcnow(),posted_by_user=data['posted_by_user'],decision=data['decision'],decision_reason=['decision_reason'])
+brandtype=data['brandtype'],branddescription=data['branddescription'],brandname=data['brandname'],brandcategory=data['brandcategory'],brandemail=data['brandemail'],brandwebpage=data['brandwebpage'],active=data['active'],brand_id=data['brand_id'],claimed=data['claimed'],posted_by_dt=datetime.datetime.utcnow(),status_change_dt=datetime.datetime.utcnow(),posted_by_user=data['posted_by_user'],decision=data['decision'],decision_reason=['decision_reason'])
     db.session.add(create_request)
     db.session.commit()
 
     return jsonify({'message' : 'New pulse request created!'})
+
+@app.route('/requests/update/pulse', methods=['POST'])
+@token_required
+def action_pulse(current_user):
+    if not current_user.active:
+        return jsonify({'message' : 'Cannot perform that function!'})
+
+    data = request.get_json()
+    decision = data["decision"]
+    pulse_id = data["pulse_id"]
+    pulse_ref = db.collection(u'pulse').document(pulse_id)
+    # Set the capital field
+    update_data = {
+        u'capital': True,
+        u'active_changed_dt': firestore.SERVER_TIMESTAMP
+    }
+    pulse_ref.update(update_data)
+    return jsonify({'message': 'Pulse request has been updated!'})
+
+@app.route('/requests/get/brand', methods=['GET'])
+@token_required
+def get_category(current_user):
+    if not current_user.active:
+        return jsonify({'message': 'Cannot perform that function!'})
+
+    brands = new_brand_requests.query.filter(new_brand_requests.active == False)
+
+    if brands.count() == 0:
+        return jsonify({'message': 'Category not found!'}), 204
+
+
+    output = []
+    for brand in brands:
+        data = {}
+        
+        data['id'] = cat.id
+        data['category'] = cat.category
+        data['type'] = cat.type
+        output.append(data)
+
+    return jsonify({'results': output})
+
+
+@app.route('/requests/update/brand', methods=['POST'])
+@token_required
+def action_brand(current_user):
+    if not current_user.active:
+        return jsonify({'message' : 'Cannot perform that function!'})
+
+    data = request.get_json()
+    decision = data["decision"]
+    doc_id = data["doc_id"]  #Doc_id should be posteded_by_user
+    decision = data["decision"]
+    active = data["active"]
+    decision_reason = data["decision_reason"]
+    status_change_dt = data["status_change_dt"]
+    #Database update
+    brand_db_update = new_brand_requests.query.filter_by(posted_by_user=doc_id).first()
+
+    if not brand_db_update:
+        return jsonify({'message': 'No pulse found to update!'}), 204
+
+    brand_db_update.active = active
+    brand_db_update.status_change_dt = status_change_dt
+    brand_db_update.decision = decision
+    brand_db_update.decision_reason = decision_reason
+    db.session.commit()
+    #Firestore update
+    brand_ref = fire_db.collection(u'brands').document(doc_id)
+    # Set the capital field
+    update_data = {
+        u'active': active,
+        u'status_change_dt': firestore.SERVER_TIMESTAMP,
+        u'decision': decision,
+        u'decision_reason': decision_reason
+    }
+    brand_ref.update(update_data)
+
+    return jsonify({'message': 'Brand request has been updated!'})
 
 @app.route('/login')
 def login():
