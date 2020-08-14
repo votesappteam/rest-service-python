@@ -256,7 +256,7 @@ def action_pulse(current_user):
     pulse_ref = db.collection(u'pulse').document(pulse_id)
     # Set the capital field
     update_data = {
-        u'capital': True,
+        u'active': decision,
         u'active_changed_dt': firestore.SERVER_TIMESTAMP
     }
     pulse_ref.update(update_data)
@@ -264,7 +264,7 @@ def action_pulse(current_user):
 
 @app.route('/requests/get/brand', methods=['GET'])
 @token_required
-def get_category(current_user):
+def get_brand(current_user):
     if not current_user.active:
         return jsonify({'message': 'Cannot perform that function!'})
 
@@ -278,9 +278,65 @@ def get_category(current_user):
     for brand in brands:
         data = {}
         
-        data['id'] = cat.id
-        data['category'] = cat.category
-        data['type'] = cat.type
+        data['id'] = brand.id
+        data['brandname'] = brand.brandname
+        data['branddescription'] = brand.branddescription
+        data['brandcategory'] = brand.brandcategory
+        data['brandtype'] = brand.brandtype
+        data['posted_by_dt'] = brand.posted_by_dt
+        data['status_change_dt'] = brand.status_change_dt
+        data['active'] = brand.active
+        data['decision_reason'] = brand.decision_reason
+        data['decision'] = brand.decision
+        data['brand_id'] = brand.brand_id
+        data['posted_by_user'] = brand.posted_by_user
+        data['claimed'] = brand.claimed
+        data['brandemail'] = brand.brandemail
+        data['brandwebpage'] = brand.brandwebpage
+
+        output.append(data)
+
+    return jsonify({'results': output})
+
+
+@app.route('/requests/get/pulse', methods=['GET'])
+@token_required
+def get_pulse(current_user):
+    if not current_user.active:
+        return jsonify({'message': 'Cannot perform that function!'})
+
+    pulses = new_pulse_requests.query.filter(new_brand_requests.active == False)
+
+    if pulses.count() == 0:
+        return jsonify({'message': 'Category not found!'}), 204
+
+    output = []
+    for pulse in pulses:
+        data = {}
+
+        data['id'] = pulse.id
+        data['type_name'] = pulse.type_name
+        data['category'] = pulse.category
+        data['type'] = pulse.type
+        data['type_name_native'] = pulse.type_name_native
+        data['type_short_name'] = pulse.type_short_name
+        data['posted_by_dt'] = pulse.posted_by_dt
+        data['last_reset_date'] = pulse.last_reset_date
+        data['last_updated_date'] = pulse.last_updated_date
+        data['active_changed_dt'] = pulse.active_changed_dt
+        data['active'] = pulse.active
+        data['urlstring'] = pulse.urlstring
+        data['country'] = pulse.country
+        data['state'] = pulse.state
+        data['tag'] = pulse.tag
+        data['geo'] = pulse.geo
+        data['brand_id'] = pulse.brand_id
+        data['pulse_id'] = pulse.pulse_id
+        data['posted_by_user'] = pulse.posted_by_user
+        data['claimed'] = pulse.claimed
+        data['official_email'] = pulse.official_email
+        data['official_website'] = pulse.official_website
+
         output.append(data)
 
     return jsonify({'results': output})
