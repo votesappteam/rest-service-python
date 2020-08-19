@@ -4,8 +4,8 @@ SMTPserver = smtplib.SMTP_SSL('smtp.zoho.in', 465)
 sender =     'service@votesapp.co.in'
 destination = ['versionanbu01@gmail.com']
 USERNAME = 'service@votesapp.co.in'
-PASSWORD = 'UzpiR7aHw9Y1'
-#PASSWORD = 'Sindhu123$'
+#PASSWORD = 'UzpiR7aHw9Y1'
+PASSWORD = 'Sindhu123$'
 
 # typical values for text_subtype are plain, html, xml
 text_subtype = 'plain'

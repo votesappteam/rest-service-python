@@ -137,6 +137,12 @@ class pulse_category(db.Model):
     type = db.Column(db.String(45))
     status = db.Column(db.Boolean)
 
+# static list of categories and types(sub categories) and attributes
+class pulse_category_attribute(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50))
+    type = db.Column(db.String(45))
+    attributes = db.Column(db.String(50))
 
 
 def token_required(f):
@@ -253,7 +259,24 @@ def action_pulse(current_user):
     data = request.get_json()
     decision = data["decision"]
     pulse_id = data["pulse_id"]
+
+    pulses = new_pulse_requests.query.filter(new_brand_requests.pulse_id == pulse_id).first()
+
+    if pulses.count() == 0:
+        return jsonify({'message': 'Category not found!'}), 204
+    for pulse in pulses:
+        cat = pulse.category
+        type = pulse.type
+    attributes = pulse_category_attribute.query.filter(pulse_category_attribute.category==cat,pulse_category_attribute.type==type)
+    if attributes.count() == 0:
+        return jsonify({'message': 'Attributes not found!'}), 204
+
     pulse_ref = db.collection(u'pulse').document(pulse_id)
+    for attri in attributes:
+        insert_attributes = {
+        u'evaluationData' : [attri["excellent":0, "good":0, "average":0, "poor":0, "worst":0]]
+        }
+        pulse_ref.update(insert_attributes)
     # Set the capital field
     update_data = {
         u'active': decision,
@@ -349,7 +372,6 @@ def action_brand(current_user):
         return jsonify({'message' : 'Cannot perform that function!'})
 
     data = request.get_json()
-    decision = data["decision"]
     doc_id = data["doc_id"]  #Doc_id should be posteded_by_user
     decision = data["decision"]
     active = data["active"]
@@ -376,6 +398,7 @@ def action_brand(current_user):
         u'decision_reason': decision_reason
     }
     brand_ref.update(update_data)
+
 
     return jsonify({'message': 'Brand request has been updated!'})
 
