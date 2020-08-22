@@ -32,9 +32,9 @@ config.read(configFile)
 
 userpass = config['MYSQLDB']['USERPASS']
 basedir  = '127.0.0.1'
-dbname   = '/votesapp_db'
+dbname  = '/votesapp_db'
 socket = config['MYSQLDB']['SOCKET']
-dbname   = dbname + socket
+dbname = dbname + socket
 
 
 app.config['SECRET_KEY'] = config['SECURITY']['SECRET_KEY']
