@@ -8,7 +8,7 @@ config = configparser.ConfigParser()
 config.read(configFile)
 
 def sendemail(receipient,subject,body):
-    mail_content = body
+    mail_content = "Hi, Your OTP for the session is :" + body
     #The mail addresses and password
     sender_address = config['SECURITY']['EMAIL_SENDER']
     sender_pass = config['SECURITY']['EMAIL_PWD']

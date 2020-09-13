@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>votesapp_admin_1</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/ionicons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/css/theme.bootstrap_4.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Login-Form-Dark.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navigation-with-Button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form-1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Registration-Form-with-Photo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <div class="login-dark">
+        <nav class="navbar navbar-light navbar-expand-md shadow-lg navigation-clean-button">
+            <div class="container"><img src="static/img/votesapp_loogo_latest.png" style="width: 100px;"><a class="navbar-brand" href="Brand_approval_activities.html">Votesapp</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+                <div
+                    class="collapse navbar-collapse" id="navcol-1">
+                    <ul class="nav navbar-nav mr-auto">
+                        <li class="nav-item" role="presentation"><a class="nav-link" href="Brand_approval_activities.html">Refresh</a></li>
+                        <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="Brand_approval_activities.html">Activities&nbsp;</a>
+                            <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="Brand_approval_activities.html">Brand Activities</a><a class="dropdown-item" role="presentation" href="#">Abuse Ques. activities</a></div>
+                        </li>
+                    </ul><span class="navbar-text actions"> <a class="btn btn-light action-button" role="button" href="#">Logout</a></span></div>
+    </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 class="text-center text-light" style="text-align: center;font-size: 20px;">Brand Activities</h1>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="card" id="TableSorterCard">
+            <div class="row table-topper align-items-center">
+                <div class="col-4 text-left" style="margin: 0px;padding: 5px 15px;"><button class="btn btn-primary btn-sm reset" type="button" style="padding: 5px;margin: 2px;">Reset Filters</button><button class="btn btn-warning btn-sm" id="zoom_in" type="button" zoomclick="ChangeZoomLevel(-10);" style="padding: 5px;margin: 2px;"><i class="fa fa-search-plus"></i></button>
+                    <button
+                        class="btn btn-warning btn-sm" id="zoom_out" type="button" zoomclick="ChangeZoomLevel(-10);" style="padding: 5px;margin: 2px;"><i class="fa fa-search-minus"></i></button>
+                </div>
+                <div class="col-4 text-center" style="margin: 0px;padding: 5px 10px;">
+                    <h6 id="counter">Showing: <strong id="rowCount">ALL</strong>&nbsp;Row(s)</h6>
+                </div>
+                <div class="col-4 text-right" style="margin: 0px;padding: 5px 10px;"><a href="#" data-toggle="modal" data-target="#tablehelpModal"><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="Custom Sort Details" aria-hidden="true" style="padding: 5px 15px;margin: 2px;"></i></a></div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div>
+                        <table class="table table tablesorter" id="ipi-table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th class="filter-false sorter-false">Id</th>
+                                    <th>Column 1</th>
+                                    <th>Column 1</th>
+                                    <th>Column 1</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Cell 1</td>
+                                    <td>Cell 2</td>
+                                    <td>Cell 3</td>
+                                    <td>Cell 4</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>6</td>
+                                    <td>7</td>
+                                    <td>8</td>
+                                </tr>
+                                <tr>
+                                    <td>A</td>
+                                    <td>bee</td>
+                                    <td>SeA</td>
+                                    <td>D</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" role="dialog" tabindex="-1" id="tablehelpModal" aria-labeledby="tablehelpModal" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Table Filtering Options</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button></div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:1%">Priority</th>
+                                            <th style="width:9%">Operator</th>
+                                            <th style="width:30%">Description</th>
+                                            <th style="width:60%">Examples</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td><code>|</code>&nbsp;or&nbsp;&nbsp;<code>OR</code><br></td>
+                                            <td>Logical "or" (Vertical bar). Filter the column for content that matches text from either side of the bar.<br></td>
+                                            <td><code>&lt;20 | &gt;40</code>&nbsp;(matches a column cell with either "&lt;20" or "&gt;40")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td><code>&amp;&amp;</code>&nbsp;or <code>AND</code><br></td>
+                                            <td>Logical "and". Filter the column for content that matches text from either side of the operator.<br></td>
+                                            <td><code>&gt;20 &amp;&amp; &gt;40</code>&nbsp;(matches a column cell that contains both "&gt;20" and "&lt;40")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td><code>/\d/</code><br></td>
+                                            <td>Add any regex to the query to use in the query ("mig" flags can be included&nbsp;<code>/\w/mig</code>)<br></td>
+                                            <td><code>/b[aeiou]g/i</code>&nbsp;(finds "bag", "beg", "BIG", "Bug", etc);<code>&gt;/r$/</code>&nbsp;(matches text that ends with an "r")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td><code>&lt; &lt;= &gt;= &gt;</code><br></td>
+                                            <td>Find alphabetical or numerical values less than or greater than or equal to the filtered query .<br></td>
+                                            <td><code>&lt;=10</code>&nbsp;(find values greater than or equal to 10)<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td><code>!</code>&nbsp;or&nbsp;<code>!=</code><br></td>
+                                            <td>Not operator, or not exactly match. Filter the column with content that&nbsp;<strong>do not</strong>&nbsp;match the query. Include an equal (<code>=</code>), single (<code>'</code>) or double quote (<code>"</code>)
+                                                to exactly&nbsp;<em>not</em>&nbsp;match a filter.<br><br><br></td>
+                                            <td><code>!e</code>&nbsp;(find text that doesn't contain an "e");<code>!"ELISA"</code>&nbsp;(find content that does not exactly match "ELISA")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td><code>"</code>&nbsp;or&nbsp;<code>=</code><br></td>
+                                            <td>To exactly match the search query, add a quote, apostrophe or equal sign to the beginning and/or end of the query<br></td>
+                                            <td><code>abc"</code>&nbsp;or&nbsp;<code>abc=</code>&nbsp;(exactly match "abc")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td><code>-</code>&nbsp;or <code>to</code><br></td>
+                                            <td>Find a range of values. Make sure there is a space before and after the dash (or the word "to").<br></td>
+                                            <td><code>10 - 30</code>&nbsp;or&nbsp;<code>10 to 30</code>&nbsp;(match values between 10 and 30)<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td><code>?</code><br></td>
+                                            <td>Wildcard for a single, non-space character.<br></td>
+                                            <td><code>S?c</code>&nbsp;(finds "Sec" and "Soc", but not "Seec")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td><code>*</code><br></td>
+                                            <td>Wildcard for zero or more non-space characters.<br></td>
+                                            <td><code>B*k</code>&nbsp;(matches "Black" and "Book")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>9</td>
+                                            <td><code>~</code><br></td>
+                                            <td>Perform a fuzzy search (matches sequential characters) by adding a tilde to the beginning of the query<br></td>
+                                            <td><code>~bee</code>&nbsp;(matches "Bruce Lee" and "Brenda Dexter"), or&nbsp;<code>~piano</code>&nbsp;(matches "Philip Aaron Wong")<br></td>
+                                        </tr>
+                                        <tr>
+                                            <td>10</td>
+                                            <td>text<br></td>
+                                            <td>Any text entered in the filter will&nbsp;<strong>match</strong>&nbsp;text found within the column<br></td>
+                                            <td><code>abc</code>&nbsp;(finds "abc", "abcd", "abcde", etc);<code>SEC</code>&nbsp;(finds "SEC" and "Analytical SEC")<br></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer"><button class="btn btn-danger" type="button" data-dismiss="modal">Close</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.js') }}"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-filter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-storage.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/Profile-Edit-Form.js') }}"></script>
+</body>
+
+</html>

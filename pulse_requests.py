@@ -133,7 +133,7 @@ class new_brand_requests(db.Model):
     decision_reason = db.Column(db.String(100))
 
 
-# static list of categories and types(sub categories)
+# static_bk list of categories and types(sub categories)
 class pulse_category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(50))
@@ -141,7 +141,7 @@ class pulse_category(db.Model):
     status = db.Column(db.Boolean)
 
 
-# static list of categories and types(sub categories) and attributes
+# static_bk list of categories and types(sub categories) and attributes
 class pulse_category_attribute(db.Model):
     uid = db.Column(db.Integer, primary_key=True)
     id = db.Column(db.Integer)
@@ -194,7 +194,7 @@ def check_requestr(current_user, check_pid):
 
 
 # get the list of categories and sub categories(type) when a user click on post pulse/brand in the app
-@app.route('/static/category', methods=['GET'])
+@app.route('/static_bk/category', methods=['GET'])
 @token_required
 def get_category(current_user):
     if not current_user.active:
