@@ -74,6 +74,24 @@ class web_user_otp(db.Model):
     otp_used = db.Column(db.Boolean)
     otp_expired = db.Column(db.Boolean)
 
+class new_brand_requests(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    brandtype = db.Column(db.String(45))
+    branddescription = db.Column(db.String(300))
+    brandname = db.Column(db.String(70))
+    brandcategory = db.Column(db.String(45))
+    brandemail = db.Column(db.String(150))
+    brandwebpage = db.Column(db.String(250))
+    active = db.Column(db.Boolean)
+    brand_id = db.Column(db.String(45))
+    claimed = db.Column(db.Boolean)
+    posted_by_dt = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    status_change_dt = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    posted_by_user = db.Column(db.String(300))
+    decision = db.Column(db.String(15))
+    decision_reason = db.Column(db.String(100))
+
+
 def generate_otp():
     # Declare a digits variable
     # which stores all digits
@@ -125,6 +143,10 @@ def login():
                 # Redirect to home page
                 flash('Moving to OTP auth')
                 return redirect(url_for('otp_verify'))
+            else:
+                print("Email not found or not active")
+                msg = 'Email not found or not active'
+
         else:
             # Account doesnt exist or username/password incorrect
             print("Invalid email")
@@ -218,10 +240,17 @@ def home():
     # Check if user is loggedin
     if 'loggedin' in session:
         # User is loggedin show them the home page
-        return render_template('Brand_approval_activities.html', username=session['email'])
+        brands = new_brand_requests.query.filter(new_brand_requests.decision != 'approved', new_brand_requests.active == False)
+
+        return render_template('Brand_approval_activities.html', brands=brands, username=session['email'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
+@app.route('/branactivities/view', methods=['GET', 'POST'])
+def expand_brand():
+    selected_row = request.args.get('row_id')
+    print(selected_row) # <-- should print 'cat', 'dog', or 'dragon'
+    return render_template('animals.html', title='Animal Details', animal=selected_row)
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/admin/profile')
 def profile():
