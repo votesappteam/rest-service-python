@@ -246,11 +246,19 @@ def home():
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
-@app.route('/branactivities/view', methods=['GET', 'POST'])
+@app.route('/branactivities-view', methods=['GET', 'POST'])
 def expand_brand():
     selected_row = request.args.get('row_id')
-    print(selected_row) # <-- should print 'cat', 'dog', or 'dragon'
-    return render_template('animals.html', title='Animal Details', animal=selected_row)
+    brand_id = request.args.get('brand_id')
+    brandname = request.args.get('brandname')
+    branddescription = request.args.get('branddescription')
+    brandcategory = request.args.get('brandcategory')
+    brandtype = request.args.get('brandtype')
+    posted_by_user = request.args.get('posted_by_user')
+    brandemail = request.args.get('brandemail')
+    brandweb = request.args.get('brandweb')
+    print(brandname)
+    return render_template('expand_brand.html', selected_row=selected_row, brand_id=brand_id, brandname=brandname, branddescription=branddescription, brandcategory=brandcategory, brandtype=brandtype, posted_by_user=posted_by_user, brandemail=brandemail, brandweb=brandweb)
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/admin/profile')
 def profile():

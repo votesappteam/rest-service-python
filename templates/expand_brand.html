@@ -5,25 +5,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>votesapp_admin_1</title>
-    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Aleo">
-    <link rel="stylesheet" href="assets/css/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/css/theme.bootstrap_4.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-    <link rel="stylesheet" href="assets/css/Login-Form-Dark.css">
-    <link rel="stylesheet" href="assets/css/Navigation-with-Button.css">
-    <link rel="stylesheet" href="assets/css/Profile-Edit-Form-1.css">
-    <link rel="stylesheet" href="assets/css/Profile-Edit-Form.css">
-    <link rel="stylesheet" href="assets/css/Registration-Form-with-Photo.css">
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/css/theme.bootstrap_4.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Login-Form-Dark.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navigation-with-Button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form-1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Registration-Form-with-Photo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
 <body>
     <div class="container profile profile-view" id="profile">
         <div class="row">
-            <div class="col-md-12 alert-col relative"><img class="img-fluid" src="assets/img/votesapp_loogo_latest.png" width="75" height="75"><a href="index.html">Home</a></div>
+            <div class="col-md-12 alert-col relative"><img class="img-fluid" src="static/img/votesapp_loogo_latest.png" width="75" height="75"><a href="index.html">Home</a></div>
         </div>
-        <form>
+        <form >
             <div class="form-row">
                 <div class="col text-capitalize" style="text-align: center;">
                     <h1 style="font-size: 30px;">Detailed view of brand</h1>
@@ -33,18 +33,38 @@
                                 <table class="table table-striped table-bordered table-sm">
                                     <thead>
                                         <tr>
-                                            <th>Column 1</th>
-                                            <th>Column 2</th>
+                                            <th>Field name</th>
+                                            <th>Value</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Cell 1</td>
-                                            <td>Cell 2</td>
+                                            <td>Brand name</td>
+                                            <td>{{brandname}}</td>
                                         </tr>
                                         <tr>
-                                            <td>Cell 3</td>
-                                            <td>Cell 4</td>
+                                            <td>Brand description</td>
+                                            <td>{{branddescription}}</td>
+                                        </tr>
+                                      <tr>
+                                            <td>Brand category</td>
+                                            <td>{{brandcategory}}</td>
+                                        </tr>
+                                       <tr>
+                                            <td>Brand type</td>
+                                            <td>{{brandtype}}</td>
+                                        </tr>
+                                    <tr>
+                                            <td>Posted user</td>
+                                            <td>{{posted_by_user}}</td>
+                                        </tr>
+                                           <tr>
+                                            <td>Brand email</td>
+                                            <td>{{brandemail}}</td>
+                                        </tr>
+                                      <tr>
+                                            <td>Brand website</td>
+                                            <td>{{brandweb}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -55,17 +75,41 @@
             </div>
         </form>
     </div>
-    <form class="text-center" method="post"><button class="btn btn-danger text-center" type="submit">Reject&nbsp;</button><button class="btn btn-success text-center" type="submit">Approve</button></form>
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.js"></script>
+
+    <form name="form1" action="#" onsubmit="required()" class="text-center" method="post" style="text-align: center;">
+    <div class="container" style="text-align: center;">
+    <div class="row">
+
+        <div class="col"><label>Decision reason* : </label><input type="text" name="decision"  style="height: 35px;width: 250px;" /></div>
+
+    </div>
+</div>
+
+
+
+    <button class="btn btn-danger text-center" type="submit" onclick="checkField();" >Reject </button><button class="btn btn-success text-center" type="submit" onclick="checkField();">Approve</button></form>
+   <script type="text/javascript">
+function required()
+{
+var empt = document.forms["form1"]["decision"].value;
+if (empt == "")
+{
+alert("Decision reason is mandatory to provide");
+return false;
+}
+
+}
+</script>
+    <script src="static/js/jquery.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="static/js/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.js"></script>
     <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-filter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-storage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/Profile-Edit-Form.js"></script>
+    <script src="static/js/Profile-Edit-Form.js"></script>
 </body>
 
 </html>

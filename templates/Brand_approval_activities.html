@@ -77,7 +77,7 @@
                                    <td>{{brand.brandtype}}</td>
                                    <td>{{brand.posted_by_user}}</td>
                                    <td>{{brand.brandemail}}</td>
-                                   <td><a href="{{url_for('expand_brand', row_id=brand.id)}}">View</a></td>
+                                   <td><a href="{{url_for('expand_brand', row_id=brand.id,brand_id=brand.brand_id,brandname=brand.brandname,branddescription=brand.branddescription,brandcategory=brand.brandcategory, brandtype=brand.brandtype,posted_by_user=brand.posted_by_user,brandemail=brand.brandemail,brandweb=brand.brandwebpage)}}">View</a></td>
                               </tr>
                              {% endfor %}
                             </tbody>
