@@ -131,6 +131,7 @@ class new_brand_requests(db.Model):
     posted_by_user = db.Column(db.String(300))
     decision = db.Column(db.String(15))
     decision_reason = db.Column(db.String(100))
+    modified_by = db.Column(db.String(155))
 
 
 # static_bk list of categories and types(sub categories)

@@ -76,7 +76,7 @@
         </form>
     </div>
 
-    <form name="form1" action="#" onsubmit="required()" class="text-center" method="post" style="text-align: center;">
+    <form name="form1" action="#"  class="text-center" method="post" style="text-align: center;">
     <div class="container" style="text-align: center;">
     <div class="row">
 
@@ -85,18 +85,33 @@
     </div>
 </div>
 
-
-
-    <button class="btn btn-danger text-center" type="submit" onclick="checkField();" >Reject </button><button class="btn btn-success text-center" type="submit" onclick="checkField();">Approve</button></form>
-   <script type="text/javascript">
+<button class="btn btn-danger text-center" type="submit" name="reject"  onclick="return required();" >Reject </button><button class="btn btn-success text-center" type="submit" name="approve"  onclick="return required();">Approve</button></form>
+    <script type="text/javascript">
 function required()
 {
 var empt = document.forms["form1"]["decision"].value;
-if (empt == "")
-{
-alert("Decision reason is mandatory to provide");
-return false;
-}
+var input = empt;
+   if (input == "")
+    {
+     alert("Decision reason is mandatory to provide");
+     return false;
+    }
+    else if (input.length < 6) {
+     alert("Minimum 6 chars required as reason");
+    return false;
+   } else if (!(/^\S{3,}$/.test(input))) {
+    alert("Decision cannot contain whitespace");
+     return false;
+    }else if(!(/^[a-zA-Z]+$/.test(input)))
+    {
+     alert("Only alphabets allowed");
+     return false;
+     }
+    else if(!(/^(?:(\w)(?!\1\1))+$/.test(input)))
+    {
+     alert("per 3 alphabets allowed");
+     return false;
+    }
 
 }
 </script>

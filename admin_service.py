@@ -90,6 +90,7 @@ class new_brand_requests(db.Model):
     posted_by_user = db.Column(db.String(300))
     decision = db.Column(db.String(15))
     decision_reason = db.Column(db.String(100))
+    modified_by = db.Column(db.String(155))
 
 
 def generate_otp():
@@ -258,6 +259,39 @@ def expand_brand():
     brandemail = request.args.get('brandemail')
     brandweb = request.args.get('brandweb')
     print(brandname)
+    if request.method == 'POST' and 'decision' in request.form:
+        decision = request.form['decision']
+        if 'reject' in request.form:
+            #return redirect(url_for('login'))
+            print("Reject clicked")
+            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+
+            #if not rbrand:
+                #return jsonify({'message': 'No pulse found to update!'}), 204
+
+            rbrand.active = False
+            rbrand.decision = "rejected"
+            rbrand.decision_reason = decision
+            rbrand.status_change_dt = datetime.datetime.utcnow()
+            rbrand.modified_by = session['email']
+            db.session.commit()
+            return redirect(url_for('home'))
+
+        if 'approve' in request.form:
+            print("Approve clicked")
+            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+
+            # if not rbrand:
+            # return jsonify({'message': 'No pulse found to update!'}), 204
+            rbrand.active = True
+            rbrand.decision = "approved"
+            rbrand.decision_reason = decision
+            rbrand.status_change_dt = datetime.datetime.utcnow()
+            rbrand.modified_by = session['email']
+            db.session.commit()
+            return redirect(url_for('home'))
+        print(decision)
+
     return render_template('expand_brand.html', selected_row=selected_row, brand_id=brand_id, brandname=brandname, branddescription=branddescription, brandcategory=brandcategory, brandtype=brandtype, posted_by_user=posted_by_user, brandemail=brandemail, brandweb=brandweb)
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/admin/profile')
