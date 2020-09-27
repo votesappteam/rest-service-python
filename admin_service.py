@@ -6,6 +6,7 @@ import random
 import re
 import string
 
+import flask
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 # import pymysql
 from flask_pymongo import PyMongo
@@ -48,7 +49,7 @@ mongo = PyMongo(app)
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 session = {}
-
+session['valid_email'] = False
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -112,6 +113,8 @@ def generate_request_id():
 #Reference --> https://codeshack.io/login-system-python-flask-mysql/
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    ip_address = flask.request.remote_addr
+    print(ip_address)
     error = None
     # Output message if something goes wrong...
     msg = ''
@@ -134,6 +137,7 @@ def login():
 
                 session['id'] = active.id
                 session['email'] = active.email
+                session['valid_email'] = True
                 otp = int(generate_otp())
                 request_id = generate_request_id()
                 requested_by = session['email']
@@ -145,11 +149,13 @@ def login():
                 flash('Moving to OTP auth')
                 return redirect(url_for('otp_verify'))
             else:
+                session['valid_email'] = False
                 print("Email not found or not active")
                 msg = 'Email not found or not active'
 
         else:
             # Account doesnt exist or username/password incorrect
+            session['valid_email'] = False
             print("Invalid email")
             msg = 'Invalid email'
     # Show the login form with message (if any)
@@ -158,6 +164,11 @@ def login():
 
 @app.route('/otp', methods=['GET', 'POST'])
 def otp_verify():
+    #To check whether an email validated
+    print(session['valid_email'])
+    if session['valid_email'] == False:
+        print("Email not validated")
+        return redirect(url_for('login'))
     # Output message if something goes wrong...
     msg = ''
     # Check if "username" and "password" POST requests exist (user submitted form)
@@ -177,11 +188,16 @@ def otp_verify():
         print(otp)
         if otp:
             if otp.otp_used==True:
-                return 'OTP is not active'
+                msg = 'OTP is expired'
+                return render_template('otp_verify.html', msg=msg)
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
+            otp.otp_used = True
+            otp.otp_expired = True
+            db.session.commit()
             # Redirect to home page
             return redirect(url_for('home'))
+
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Invalid OTP'
