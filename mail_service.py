@@ -21,7 +21,7 @@ def sendemail(receipient,subject,body):
     #The body and the attachments for the mail
     message.attach(MIMEText(mail_content, 'plain'))
     #Create SMTP session for sending the mail
-    session = smtplib.SMTP('smtp.zoho.in', 587) #use gmail with port
+    session = smtplib.SMTP('smtp.zoho.in', 587) #use zoho with port
     session.starttls() #enable security
     session.login(sender_address, sender_pass) #login with mail_id and password
     text = message.as_string()

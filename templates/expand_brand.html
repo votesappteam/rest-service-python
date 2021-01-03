@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/css/theme.bootstrap_4.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Login-Form-Dark.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Login-Form-Dark.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Navigation-with-Button.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form-1.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form.css') }}">
@@ -21,7 +22,7 @@
 <body>
     <div class="container profile profile-view" id="profile">
         <div class="row">
-            <div class="col-md-12 alert-col relative"><img class="img-fluid" src="static/img/votesapp_loogo_latest.png" width="75" height="75"><a href="index.html">Home</a></div>
+            <div class="col-md-12 alert-col relative"><img class="img-fluid" src="static/img/votesapp_loogo_latest.png" width="75" height="75"><a href="{{url_for('home')}}"><-Back to Brand requests</a></div>
         </div>
         <form >
             <div class="form-row">

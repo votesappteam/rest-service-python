@@ -13,10 +13,16 @@ from flask_pymongo import PyMongo
 from flask_sqlalchemy import SQLAlchemy
 from source.mail_service import sendemail
 app = Flask(__name__)
-#app = Flask(_name__, template_folder='templates_bk')
+
+# Firebase related
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
 
 #Read the config file
 configFile = '/var/www/votesapp-rest/config.ini'
+firebase_key = '/var/www/votesapp-rest/testvotes-d4cd7-firebase-adminsdk-oqlux-66b40b5463.json'
 
 config = configparser.ConfigParser()
 config.read(configFile)
@@ -54,6 +60,11 @@ session['valid_email'] = False
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Use a service account
+cred = credentials.Certificate(firebase_key)
+firebase_admin.initialize_app(cred)
+fire_db = firestore.client()
+# https://firebase.google.com/docs/firestore/quickstart#python
 
 db = SQLAlchemy(app)
 
@@ -187,7 +198,7 @@ def otp_verify():
         otp = web_user_otp.query.filter(web_user_otp.otp == otp_web ).first()
         print(otp)
         if otp:
-            if otp.otp_used==True:
+            if otp.otp_used == True or otp.otp_expired == True:
                 msg = 'OTP is expired'
                 return render_template('otp_verify.html', msg=msg)
             # Create session data, we can access this data in other routes
@@ -207,9 +218,11 @@ def otp_verify():
 @app.route('/admin/logout')
 def logout():
     # Remove session data, this will log the user out
+   session['valid_email'] = False
+   session['loggedin'] = False
    session.pop('loggedin', None)
    session.pop('id', None)
-   session.pop('username', None)
+   session.pop('email', None)
    # Redirect to login page
    return redirect(url_for('login'))
 
@@ -263,6 +276,17 @@ def home():
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
+@app.route('/abuseactivities')
+def abuse():
+    # Check if user is loggedin
+    if 'loggedin' in session:
+        # User is loggedin show them the home page
+        brands = new_brand_requests.query.filter(new_brand_requests.decision != 'approved', new_brand_requests.active == False)
+
+        return render_template('Brand_approval_activities.html', brands=brands, username=session['email'])
+    # User is not loggedin redirect to login page
+    return redirect(url_for('login'))
+
 @app.route('/branactivities-view', methods=['GET', 'POST'])
 def expand_brand():
     selected_row = request.args.get('row_id')
@@ -277,9 +301,20 @@ def expand_brand():
     print(brandname)
     if request.method == 'POST' and 'decision' in request.form:
         decision = request.form['decision']
+        brand_ref = fire_db.collection(u'brands').document(brand_id)
         if 'reject' in request.form:
             #return redirect(url_for('login'))
             print("Reject clicked")
+
+            update_data = {
+                u'active': False,
+                u'status_change_dt': firestore.SERVER_TIMESTAMP,
+                u'decision': "rejected",
+                u'decision_reason': decision
+            }
+            brand_ref.update(update_data)
+
+
             rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
 
             #if not rbrand:
@@ -291,10 +326,19 @@ def expand_brand():
             rbrand.status_change_dt = datetime.datetime.utcnow()
             rbrand.modified_by = session['email']
             db.session.commit()
+
             return redirect(url_for('home'))
 
         if 'approve' in request.form:
             print("Approve clicked")
+
+            update_data = {
+                u'active': True,
+                u'status_change_dt': firestore.SERVER_TIMESTAMP,
+                u'decision': "approved",
+                u'decision_reason': decision
+            }
+            brand_ref.update(update_data)
             rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
 
             # if not rbrand:
