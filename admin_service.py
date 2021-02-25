@@ -296,12 +296,14 @@ def abuse():
         #query = abuse_ref.where(u'active', u'==', True)
         query = abuse_ref.limit(10).where(u'active', u'==', True).where(u'reportabuse', u'>', 1).order_by(u'reportabuse', direction=firestore.Query.DESCENDING).order_by(u'upvote').stream()
             #results = query.stream()
+        listTohtml = []
         for q in query:
             qdict = q.to_dict()
             print(qdict)
             print(qdict['reportabuse'])
+            listTohtml.append(qdict.copy())
 
-        return render_template('Abuse_questions_activities.html', questions=query, username=session['email'])
+        return render_template('Abuse_questions_activities.html', questions=listTohtml, username=session['email'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
