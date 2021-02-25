@@ -5,25 +5,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>votesapp_admin_1</title>
-    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Aleo">
-    <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
-    <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
-    <link rel="stylesheet" href="assets/css/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/ionicons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/css/theme.bootstrap_4.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-    <link rel="stylesheet" href="assets/css/Login-Form-Dark.css">
-    <link rel="stylesheet" href="assets/css/Navigation-with-Button.css">
-    <link rel="stylesheet" href="assets/css/Profile-Edit-Form-1.css">
-    <link rel="stylesheet" href="assets/css/Profile-Edit-Form.css">
-    <link rel="stylesheet" href="assets/css/Registration-Form-with-Photo.css">
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Login-Form-Dark.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navigation-with-Button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form-1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-Edit-Form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Registration-Form-with-Photo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
 <body>
     <div class="login-dark">
         <nav class="navbar navbar-light navbar-expand-md shadow-lg navigation-clean-button">
-            <div class="container"><img src="assets/img/votesapp_loogo_latest.png" style="width: 100px;"><a class="navbar-brand" href="Brand_approval_activities1.html">Votesapp</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="container"><img src="static/img/votesapp_loogo_latest.png" style="width: 100px;"><a class="navbar-brand" href="Brand_approval_activities1.html">Votesapp</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
                 <div
                     class="collapse navbar-collapse" id="navcol-1">
                     <ul class="nav navbar-nav mr-auto">
@@ -70,36 +70,20 @@
                                 </tr>
                             </thead>
                             <tbody>
+                            {% for question in questions %}
+                            {% for q in question %}
+                             {% qdict = q.to_dict() %}
                                 <tr>
-                                    <td>Cell 1</td>
-                                    <td>Cell 2</td>
-                                    <td>Cell 3</td>
-                                    <td>Cell 4</td>
-                                    <td>Cell 4</td>
-                                    <td>Cell 4</td>
-                                    <td>
-                                        <div class="btn-group" role="group"><button class="btn btn-success border rounded-0 border-warning" type="button" style="color: rgb(160,230,184);">A</button><button class="btn btn-danger border-light" type="button">D</button></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>6</td>
-                                    <td>7</td>
-                                    <td>8</td>
-                                    <td>8</td>
-                                    <td>8</td>
-                                    <td>8</td>
-                                    <td><input type="text"></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>A</td>
-                                    <td>bee</td>
-                                    <td>SeA</td>
-                                    <td>D</td>
-                                    <td>D</td>
-                                    <td>D</td>
-                                </tr>
+                                    <td>qdict.question</td>
+                                    <td>qdict.totalvote</td>
+                                    <td>qdict.upvote</td>
+                                    <td>qdict.reportabuse</td>
+                                    <td>qdict.active</td>
+                                    <td>"--"</td>
+                                    <td>"--"</td>
+                                         </tr>
+                                   {% endfor %}
+                             {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -200,16 +184,16 @@
         </div>
     </div>
     </div>
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.js"></script>
+    <script src="static/js/jquery.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="static/js/Data-Table-with-Search-Sort-Filter-and-Zoom-using-TableSorter.js"></script>
     <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-filter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-storage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/Profile-Edit-Form.js"></script>
+    <script src="static/js/Profile-Edit-Form.js"></script>
 </body>
 
 </html>

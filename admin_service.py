@@ -12,6 +12,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_pymongo import PyMongo
 from flask_sqlalchemy import SQLAlchemy
 from source.mail_service import sendemail
+
 app = Flask(__name__)
 
 # Firebase related
@@ -19,23 +20,20 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-
-#Read the config file
+# Read the config file
 configFile = '/var/www/votesapp-rest/config.ini'
 firebase_key = '/var/www/votesapp-rest/testvotes-d4cd7-firebase-adminsdk-oqlux-66b40b5463.json'
 
 config = configparser.ConfigParser()
 config.read(configFile)
 
-
-#PySQL configurations
+# PySQL configurations
 
 userpass = config['MYSQLDB']['USERPASS']
-basedir  = '127.0.0.1'
-dbname  = '/votesapp_db'
+basedir = '127.0.0.1'
+dbname = '/votesapp_db'
 socket = config['MYSQLDB']['SOCKET']
 dbname = dbname + socket
-
 
 app.config['SECRET_KEY'] = config['SECURITY']['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = userpass + basedir + dbname
@@ -47,18 +45,20 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 mongo_connect_str = 'mongodb://localhost:27017/'
-mongo_db ='votesapp_db'
-#Mongo configuration
+mongo_db = 'votesapp_db'
+# Mongo configuration
 app.config['MONGO_DBNAME'] = 'votesapp_db'
-app.config['MONGO_URI'] = mongo_connect_str+mongo_db
+app.config['MONGO_URI'] = mongo_connect_str + mongo_db
 mongo = PyMongo(app)
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 session = {}
 session['valid_email'] = False
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # Use a service account
 cred = credentials.Certificate(firebase_key)
@@ -67,6 +67,7 @@ fire_db = firestore.client()
 # https://firebase.google.com/docs/firestore/quickstart#python
 
 db = SQLAlchemy(app)
+
 
 class web_user(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -77,6 +78,7 @@ class web_user(db.Model):
     active = db.Column(db.Boolean)
     created_dt = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
+
 class web_user_otp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     request_id = db.Column(db.Integer)
@@ -85,6 +87,7 @@ class web_user_otp(db.Model):
     requested_by = db.Column(db.String(45))
     otp_used = db.Column(db.Boolean)
     otp_expired = db.Column(db.Boolean)
+
 
 class new_brand_requests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -118,10 +121,13 @@ def generate_otp():
 
     return OTP
 
+
 def generate_request_id():
     ri = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     return ri
-#Reference --> https://codeshack.io/login-system-python-flask-mysql/
+
+
+# Reference --> https://codeshack.io/login-system-python-flask-mysql/
 @app.route('/', methods=['GET', 'POST'])
 def login():
     ip_address = flask.request.remote_addr
@@ -135,14 +141,13 @@ def login():
         email = request.form['email']
         print(email)
         # Check if account exists using MySQL
-        #email = username+"@votesapp.co.in"
-
+        # email = username+"@votesapp.co.in"
 
         if email:
             active = web_user.query.filter(web_user.email == email).first()
 
             if active:
-                if active.active==False:
+                if active.active == False:
                     return 'Account is not active'
                 # Create session data, we can access this data in other routes
 
@@ -152,7 +157,8 @@ def login():
                 otp = int(generate_otp())
                 request_id = generate_request_id()
                 requested_by = session['email']
-                otp_request = web_user_otp(otp=otp, request_id=request_id, requested_by=requested_by, otp_used=False, otp_expired=False)
+                otp_request = web_user_otp(otp=otp, request_id=request_id, requested_by=requested_by, otp_used=False,
+                                           otp_expired=False)
                 db.session.add(otp_request)
                 db.session.commit()
                 sendemail(requested_by, "Your OTP for login", str(otp))
@@ -175,7 +181,7 @@ def login():
 
 @app.route('/otp', methods=['GET', 'POST'])
 def otp_verify():
-    #To check whether an email validated
+    # To check whether an email validated
     print(session['valid_email'])
     if session['valid_email'] == False:
         print("Email not validated")
@@ -193,9 +199,9 @@ def otp_verify():
             print("Verify clicked")
         print(otp_web)
         # Check if account exists using MySQL
-        #email = username+"@votesapp.co.in"
+        # email = username+"@votesapp.co.in"
 
-        otp = web_user_otp.query.filter(web_user_otp.otp == otp_web ).first()
+        otp = web_user_otp.query.filter(web_user_otp.otp == otp_web).first()
         print(otp)
         if otp:
             if otp.otp_used == True or otp.otp_expired == True:
@@ -214,17 +220,20 @@ def otp_verify():
             msg = 'Invalid OTP'
     # Show the login form with message (if any)
     return render_template('otp_verify.html', msg=msg)
+
+
 # http://localhost:5000/python/logout - this will be the logout page
 @app.route('/admin/logout')
 def logout():
     # Remove session data, this will log the user out
-   session['valid_email'] = False
-   session['loggedin'] = False
-   session.pop('loggedin', None)
-   session.pop('id', None)
-   session.pop('email', None)
-   # Redirect to login page
-   return redirect(url_for('login'))
+    session['valid_email'] = False
+    session['loggedin'] = False
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('email', None)
+    # Redirect to login page
+    return redirect(url_for('login'))
+
 
 # http://localhost:5000/pythinlogin/register - this will be the registration page, we need to use both GET and POST requests
 @app.route('/register', methods=['GET', 'POST'])
@@ -233,16 +242,16 @@ def register():
     msg = ''
     print("Inside register")
     # Check if "username", "password" and "email" POST requests exist (user submitted form)
-    #if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
+    # if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
     if request.method == 'POST':
         # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
         role = request.form['role']
-        print(username,password,role)
+        print(username, password, role)
         email = username + "@votesapp.co.in"
         account = web_user.query.filter(web_user.email == email).first()
-         # If account exists show error and validation checks
+        # If account exists show error and validation checks
         if account:
             msg = 'Account already exists!'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
@@ -253,13 +262,13 @@ def register():
             msg = 'Please fill out the form and submit!'
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
-            register_user = web_user(email=email,password=password,role=role,active=False)
+            register_user = web_user(email=email, password=password, role=role, active=False)
             db.session.add(register_user)
             db.session.commit()
             msg = 'You have successfully registered!'
-    #elif request.method == 'POST':
-        # Form is empty... (no POST data)
-        #msg = 'Please fill out the form and submit!'
+    # elif request.method == 'POST':
+    # Form is empty... (no POST data)
+    # msg = 'Please fill out the form and submit!'
     # Show registration form with message (if any)
     return render_template('register.html', msg=msg)
 
@@ -270,22 +279,32 @@ def home():
     # Check if user is loggedin
     if 'loggedin' in session:
         # User is loggedin show them the home page
-        brands = new_brand_requests.query.filter(new_brand_requests.decision != 'approved', new_brand_requests.active == False)
+        brands = new_brand_requests.query.filter(new_brand_requests.decision != 'approved',
+                                                 new_brand_requests.active == False)
 
         return render_template('Brand_approval_activities.html', brands=brands, username=session['email'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+
 
 @app.route('/abuseactivities')
 def abuse():
     # Check if user is loggedin
     if 'loggedin' in session:
         # User is loggedin show them the home page
-        brands = new_brand_requests.query.filter(new_brand_requests.decision != 'approved', new_brand_requests.active == False)
+        abuse_ref = fire_db.collection(u'questions')
+        #query = abuse_ref.where(u'active', u'==', True)
+        query = abuse_ref.limit(10).where(u'active', u'==', True).where(u'reportabuse', u'>', 1).order_by(u'reportabuse', direction=firestore.Query.DESCENDING).order_by(u'upvote').stream()
+            #results = query.stream()
+        for q in query:
+            qdict = q.to_dict()
+            print(qdict)
+            print(qdict['reportabuse'])
 
-        return render_template('Brand_approval_activities.html', brands=brands, username=session['email'])
+        return render_template('Abuse_questions_activities.html', questions=query, username=session['email'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+
 
 @app.route('/branactivities-view', methods=['GET', 'POST'])
 def expand_brand():
@@ -303,7 +322,7 @@ def expand_brand():
         decision = request.form['decision']
         brand_ref = fire_db.collection(u'brands').document(brand_id)
         if 'reject' in request.form:
-            #return redirect(url_for('login'))
+            # return redirect(url_for('login'))
             print("Reject clicked")
 
             update_data = {
@@ -314,11 +333,10 @@ def expand_brand():
             }
             brand_ref.update(update_data)
 
-
             rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
 
-            #if not rbrand:
-                #return jsonify({'message': 'No pulse found to update!'}), 204
+            # if not rbrand:
+            # return jsonify({'message': 'No pulse found to update!'}), 204
 
             rbrand.active = False
             rbrand.decision = "rejected"
@@ -352,7 +370,11 @@ def expand_brand():
             return redirect(url_for('home'))
         print(decision)
 
-    return render_template('expand_brand.html', selected_row=selected_row, brand_id=brand_id, brandname=brandname, branddescription=branddescription, brandcategory=brandcategory, brandtype=brandtype, posted_by_user=posted_by_user, brandemail=brandemail, brandweb=brandweb)
+    return render_template('expand_brand.html', selected_row=selected_row, brand_id=brand_id, brandname=brandname,
+                           branddescription=branddescription, brandcategory=brandcategory, brandtype=brandtype,
+                           posted_by_user=posted_by_user, brandemail=brandemail, brandweb=brandweb)
+
+
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/admin/profile')
 def profile():
@@ -367,6 +389,6 @@ def profile():
 
 
 if __name__ == '__main__':
-    session_id=-1
+    session_id = -1
     session_email = ''
     app.run(debug=True)
