@@ -377,6 +377,73 @@ def expand_brand():
                            posted_by_user=posted_by_user, brandemail=brandemail, brandweb=brandweb)
 
 
+
+@app.route('/abuseactivities-view', methods=['GET', 'POST'])
+def expand_abuse():
+    user_id = request.args.get('user_id')
+    question = request.args.get('question')
+    category = request.args.get('category')
+    totalvote = request.args.get('totalvote')
+    upvote = request.args.get('upvote')
+    reportabuse = request.args.get('reportabuse')
+    status = request.args.get('active')
+    question_type = request.args.get('question_type')
+
+    if request.method == 'POST' and 'decision' in request.form:
+        decision = request.form['decision']
+        brand_ref = fire_db.collection(u'questions').document(brand_id)
+        if 'reject' in request.form:
+            # return redirect(url_for('login'))
+            print("Reject clicked")
+
+            update_data = {
+                u'active': False,
+                u'status_change_dt': firestore.SERVER_TIMESTAMP,
+                u'decision': "rejected",
+                u'decision_reason': decision
+            }
+            brand_ref.update(update_data)
+
+            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+
+            # if not rbrand:
+            # return jsonify({'message': 'No pulse found to update!'}), 204
+
+            rbrand.active = False
+            rbrand.decision = "rejected"
+            rbrand.decision_reason = decision
+            rbrand.status_change_dt = datetime.datetime.utcnow()
+            rbrand.modified_by = session['email']
+            db.session.commit()
+
+            return redirect(url_for('home'))
+
+        if 'approve' in request.form:
+            print("Approve clicked")
+
+            update_data = {
+                u'active': True,
+                u'status_change_dt': firestore.SERVER_TIMESTAMP,
+                u'decision': "approved",
+                u'decision_reason': decision
+            }
+            brand_ref.update(update_data)
+            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+
+            # if not rbrand:
+            # return jsonify({'message': 'No pulse found to update!'}), 204
+            rbrand.active = True
+            rbrand.decision = "approved"
+            rbrand.decision_reason = decision
+            rbrand.status_change_dt = datetime.datetime.utcnow()
+            rbrand.modified_by = session['email']
+            db.session.commit()
+            return redirect(url_for('home'))
+        print(decision)
+
+    return render_template('expand_abuse.html',     user_id = user_id,question = question,category = category, totalvote = totalvote,upvote = upvote,reportabuse = reportabuse,status = status, question_type = question_type)
+
+
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/admin/profile')
 def profile():

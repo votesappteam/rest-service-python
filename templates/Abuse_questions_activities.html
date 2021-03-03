@@ -74,13 +74,13 @@
                             {% for q in questions %}
 
                                 <tr>
-                                    <td>{{q.id}}</td>
+                                    <td>{{q.posted_by_user}}</td>
                                     <td>{{q.question}}</td>
                                     <td>{{q.totalvote}}</td>
                                     <td>{{q.upvote}}</td>
                                     <td>{{q.reportabuse}}</td>
                                     <td>{{q.active}}</td>
-                                   <td><a href="{{url_for('expand_brand', row_id=brand.id,brand_id=brand.brand_id,brandname=brand.brandname,branddescription=brand.branddescription,brandcategory=brand.brandcategory, brandtype=brand.brandtype,posted_by_user=brand.posted_by_user,brandemail=brand.brandemail,brandweb=brand.brandwebpage)}}">View</a></td>
+                                   <td><a href="{{url_for('expand_abuse', user_id=q.posted_by_user,question=q.question,category=q.category,totalvote=q.totalvote,upvote=q.upvote,reportabuse=q.reportabuse, status=q.active, question_type=q.question_type)}}">View</a></td>
                               </tr>
 
                              {% endfor %}
