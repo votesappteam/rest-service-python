@@ -299,6 +299,7 @@ def abuse():
         listTohtml = []
         for q in query:
             qdict = q.to_dict()
+            qdict["qid"] = q.id #add the document id along with other data
             print(qdict)
             print(qdict['reportabuse'])
             listTohtml.append(qdict.copy())
@@ -380,6 +381,7 @@ def expand_brand():
 
 @app.route('/abuseactivities-view', methods=['GET', 'POST'])
 def expand_abuse():
+    qid = request.args.get('qid')
     user_id = request.args.get('user_id')
     question = request.args.get('question')
     category = request.args.get('category')
@@ -391,7 +393,7 @@ def expand_abuse():
 
     if request.method == 'POST' and 'decision' in request.form:
         decision = request.form['decision']
-        brand_ref = fire_db.collection(u'questions').document(brand_id)
+        brand_ref = fire_db.collection(u'questions').document(user_id)
         if 'reject' in request.form:
             # return redirect(url_for('login'))
             print("Reject clicked")
@@ -404,7 +406,7 @@ def expand_abuse():
             }
             brand_ref.update(update_data)
 
-            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+            rbrand = new_brand_requests.query.filter_by(posted_by_user=user_id).first()
 
             # if not rbrand:
             # return jsonify({'message': 'No pulse found to update!'}), 204
@@ -428,7 +430,7 @@ def expand_abuse():
                 u'decision_reason': decision
             }
             brand_ref.update(update_data)
-            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+            rbrand = new_brand_requests.query.filter_by(posted_by_user=user_id).first()
 
             # if not rbrand:
             # return jsonify({'message': 'No pulse found to update!'}), 204
@@ -441,7 +443,7 @@ def expand_abuse():
             return redirect(url_for('home'))
         print(decision)
 
-    return render_template('expand_abuse.html',     user_id = user_id,question = question,category = category, totalvote = totalvote,upvote = upvote,reportabuse = reportabuse,status = status, question_type = question_type)
+    return render_template('expand_abuse.html',   qid = qid,  user_id = user_id,question = question,category = category, totalvote = totalvote,upvote = upvote,reportabuse = reportabuse,status = status, question_type = question_type)
 
 
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
