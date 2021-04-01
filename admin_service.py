@@ -19,6 +19,7 @@ app = Flask(__name__)
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+from firebase_admin import storage
 
 # Read the config file
 configFile = '/var/www/votesapp-rest/config.ini'
@@ -62,7 +63,7 @@ def allowed_file(filename):
 
 # Use a service account
 cred = credentials.Certificate(firebase_key)
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, bucket {gs://testvotes-d4cd7.appspot.com})
 fire_db = firestore.client()
 # https://firebase.google.com/docs/firestore/quickstart#python
 
@@ -294,10 +295,12 @@ def abuse():
         # User is loggedin show them the home page
         abuse_ref = fire_db.collection(u'questions')
         #query = abuse_ref.where(u'active', u'==', True)
-        query = abuse_ref.limit(10).where(u'active', u'==', True).where(u'reportabuse', u'>', 1).order_by(u'reportabuse', direction=firestore.Query.DESCENDING).order_by(u'upvote').stream()
+        query = abuse_ref.limit(10).where(u'active', u'==', True).where(u'reportabuse', u'>', 1).where(u'abuse_verified', u'==', False).order_by(u'reportabuse', direction=firestore.Query.DESCENDING).order_by(u'upvote').stream()
             #results = query.stream()
         listTohtml = []
+        from firebase_admin import storage
         for q in query:
+
             qdict = q.to_dict()
             qdict["qid"] = q.id #add the document id along with other data
             print(qdict)
@@ -393,30 +396,19 @@ def expand_abuse():
 
     if request.method == 'POST' and 'decision' in request.form:
         decision = request.form['decision']
-        brand_ref = fire_db.collection(u'questions').document(user_id)
+        abuse_ref = fire_db.collection(u'questions').document(qid)
         if 'reject' in request.form:
             # return redirect(url_for('login'))
-            print("Reject clicked")
+            print("Inactive clicked")
 
             update_data = {
                 u'active': False,
-                u'status_change_dt': firestore.SERVER_TIMESTAMP,
-                u'decision': "rejected",
-                u'decision_reason': decision
+                u'active_change_dt': firestore.SERVER_TIMESTAMP,
+                u'abuse_verified':True,
+                u'active_change_madeby': session['email'],
+                u'inactive_reason': decision
             }
-            brand_ref.update(update_data)
-
-            rbrand = new_brand_requests.query.filter_by(posted_by_user=user_id).first()
-
-            # if not rbrand:
-            # return jsonify({'message': 'No pulse found to update!'}), 204
-
-            rbrand.active = False
-            rbrand.decision = "rejected"
-            rbrand.decision_reason = decision
-            rbrand.status_change_dt = datetime.datetime.utcnow()
-            rbrand.modified_by = session['email']
-            db.session.commit()
+            abuse_ref.update(update_data)
 
             return redirect(url_for('home'))
 
@@ -425,21 +417,12 @@ def expand_abuse():
 
             update_data = {
                 u'active': True,
-                u'status_change_dt': firestore.SERVER_TIMESTAMP,
-                u'decision': "approved",
-                u'decision_reason': decision
+                u'active_change_dt': firestore.SERVER_TIMESTAMP,
+                u'abuse_verified': True,
+                u'active_change_madeby': session['email'],
+                u'inactive_reason': decision
             }
-            brand_ref.update(update_data)
-            rbrand = new_brand_requests.query.filter_by(posted_by_user=user_id).first()
-
-            # if not rbrand:
-            # return jsonify({'message': 'No pulse found to update!'}), 204
-            rbrand.active = True
-            rbrand.decision = "approved"
-            rbrand.decision_reason = decision
-            rbrand.status_change_dt = datetime.datetime.utcnow()
-            rbrand.modified_by = session['email']
-            db.session.commit()
+            abuse_ref.update(update_data)
             return redirect(url_for('home'))
         print(decision)
 
