@@ -51,6 +51,10 @@
                                             <td>Question</td>
                                             <td>{{question}}</td>
                                         </tr>
+                                    <tr>
+                                            <td>Question Image</td>
+                                            <td colspan ='4'><img src={{image_signed_url}} alt="" border='3' height='150' width='150' /></td>
+                                        </tr>
                                       <tr>
                                             <td>Category</td>
                                             <td>{{category}}</td>
@@ -67,10 +71,7 @@
                                             <td>No of reports abused</td>
                                             <td>{{reportabuse}}</td>
                                         </tr>
-                                      <tr>
-                                            <td>Question status</td>
-                                            <td>{{status}}</td>
-                                        </tr>
+
                                     </tbody>
                                 </table>
                             </div>
@@ -90,7 +91,7 @@
     </div>
 </div>
 
-<button class="btn btn-danger text-center" type="submit" name="reject"  onclick="return required();" >Reject </button><button class="btn btn-success text-center" type="submit" name="approve"  onclick="return required();">Approve</button></form>
+<button class="btn btn-danger text-center" type="submit" name="reject"  onclick="return required();" >Disable Question </button><button class="btn btn-danger text-center" type="submit" name="reject-user"  onclick="return required();" >Disable User </button><button class="btn btn-success text-center" type="submit" name="approve"  onclick="return required();">Approve Question</button></form>
     <script type="text/javascript">
 function required()
 {

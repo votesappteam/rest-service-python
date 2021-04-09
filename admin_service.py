@@ -19,7 +19,7 @@ app = Flask(__name__)
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from firebase_admin import storage
+
 
 # Read the config file
 configFile = '/var/www/votesapp-rest/config.ini'
@@ -63,7 +63,7 @@ def allowed_file(filename):
 
 # Use a service account
 cred = credentials.Certificate(firebase_key)
-firebase_admin.initialize_app(cred, bucket {gs://testvotes-d4cd7.appspot.com})
+firebase_admin.initialize_app(cred)
 fire_db = firestore.client()
 # https://firebase.google.com/docs/firestore/quickstart#python
 
@@ -292,20 +292,34 @@ def home():
 def abuse():
     # Check if user is loggedin
     if 'loggedin' in session:
+        from google.cloud import storage
+        from google.cloud.storage import Blob
+        import datetime
+
+        storage_client = storage.Client.from_service_account_json(firebase_key)
+        bucket = storage_client.get_bucket("testvotes-d4cd7.appspot.com")
         # User is loggedin show them the home page
         abuse_ref = fire_db.collection(u'questions')
         #query = abuse_ref.where(u'active', u'==', True)
         query = abuse_ref.limit(10).where(u'active', u'==', True).where(u'reportabuse', u'>', 1).where(u'abuse_verified', u'==', False).order_by(u'reportabuse', direction=firestore.Query.DESCENDING).order_by(u'upvote').stream()
             #results = query.stream()
         listTohtml = []
-        from firebase_admin import storage
-        for q in query:
 
+        for q in query:
             qdict = q.to_dict()
             qdict["qid"] = q.id #add the document id along with other data
-            print(qdict)
-            print(qdict['reportabuse'])
+            #print(qdict['reportabuse'])
+            fname="questions/" + qdict['category']+"/" + q.id + ".jpg"
+            stats = storage.Blob(bucket=bucket, name=fname).exists(storage_client)
+            if stats:
+                blob = bucket.blob(fname)
+                image_signed_url = blob.generate_signed_url(datetime.timedelta(seconds=300), method='GET')
+            else:
+                image_signed_url="static/img/temp-image/no-image.jpeg"
+            qdict["image_signed_url"] = image_signed_url
+            print(image_signed_url)
             listTohtml.append(qdict.copy())
+
 
         return render_template('Abuse_questions_activities.html', questions=listTohtml, username=session['email'])
     # User is not loggedin redirect to login page
@@ -393,6 +407,7 @@ def expand_abuse():
     reportabuse = request.args.get('reportabuse')
     status = request.args.get('active')
     question_type = request.args.get('question_type')
+    image_signed_url = request.args.get('image_signed_url')
 
     if request.method == 'POST' and 'decision' in request.form:
         decision = request.form['decision']
@@ -412,6 +427,26 @@ def expand_abuse():
 
             return redirect(url_for('home'))
 
+        if 'reject-user' in request.form:
+            # return redirect(url_for('login'))
+            print("Inactive user clicked")
+
+            update_data = {
+                u'active': False,
+                u'active_change_dt': firestore.SERVER_TIMESTAMP,
+                u'abuse_verified':True,
+                u'active_change_madeby': session['email'],
+                u'inactive_reason': decision
+            }
+            abuse_ref.update(update_data)
+            #Stop the user to post the question
+            user_ref = fire_db.collection(u'users').document(user_id)
+            update_user_data = {
+                u'canCreatePolls': False
+            }
+            user_ref.update(update_user_data)
+            return redirect(url_for('home'))
+
         if 'approve' in request.form:
             print("Approve clicked")
 
@@ -426,7 +461,7 @@ def expand_abuse():
             return redirect(url_for('home'))
         print(decision)
 
-    return render_template('expand_abuse.html',   qid = qid,  user_id = user_id,question = question,category = category, totalvote = totalvote,upvote = upvote,reportabuse = reportabuse,status = status, question_type = question_type)
+    return render_template('expand_abuse.html',   qid = qid,  user_id = user_id,question = question,category = category, totalvote = totalvote,upvote = upvote,reportabuse = reportabuse,status = status, question_type = question_type, image_signed_url=image_signed_url)
 
 
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users

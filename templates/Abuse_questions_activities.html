@@ -66,6 +66,7 @@
                                     <th>Abused count</th>
                                     <th>Active</th>
                                     <th>View</th>
+                                    <th>Image</th>
 
                                 </tr>
                             </thead>
@@ -80,7 +81,8 @@
                                     <td>{{q.upvote}}</td>
                                     <td>{{q.reportabuse}}</td>
                                     <td>{{q.active}}</td>
-                                   <td><a href="{{url_for('expand_abuse', qid=q.qid, user_id=q.posted_by_user,question=q.question,category=q.category,totalvote=q.totalvote,upvote=q.upvote,reportabuse=q.reportabuse, status=q.active, question_type=q.question_type)}}">View</a></td>
+                                   <td><a href="{{url_for('expand_abuse', qid=q.qid, user_id=q.posted_by_user,question=q.question,category=q.category,totalvote=q.totalvote,upvote=q.upvote,reportabuse=q.reportabuse, status=q.active, question_type=q.question_type, image_signed_url=q.image_signed_url)}}">View</a></td>
+                                    <td colspan ='4'><img src={{q.image_signed_url}} alt="" border='3' height='100' width='100' /></td>
                               </tr>
 
                              {% endfor %}
