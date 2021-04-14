@@ -55,6 +55,7 @@ mongo = PyMongo(app)
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 session = {}
 session['valid_email'] = False
+session['abuseListToHTML'] =[]
 
 
 def allowed_file(filename):
@@ -230,6 +231,7 @@ def logout():
     session['valid_email'] = False
     session['loggedin'] = False
     session.pop('loggedin', None)
+    session['abuseListToHTML'] = []
     session.pop('id', None)
     session.pop('email', None)
     # Redirect to login page
@@ -292,6 +294,9 @@ def home():
 def abuse():
     # Check if user is loggedin
     if 'loggedin' in session:
+        #At first time we fetch top 10 abuse records, for every back and forth, we should not go to firebase and fetch again and again.. So we action on all items in the list then on ly go to firebase
+        if len(session['abuseListToHTML']) > 0 :
+            return render_template('Abuse_questions_activities.html', questions=session['abuseListToHTML'], username=session['email'])
         from google.cloud import storage
         from google.cloud.storage import Blob
         import datetime
@@ -303,7 +308,7 @@ def abuse():
         #query = abuse_ref.where(u'active', u'==', True)
         query = abuse_ref.limit(10).where(u'active', u'==', True).where(u'reportabuse', u'>', 1).where(u'abuse_verified', u'==', False).order_by(u'reportabuse', direction=firestore.Query.DESCENDING).order_by(u'upvote').stream()
             #results = query.stream()
-        listTohtml = []
+
 
         for q in query:
             qdict = q.to_dict()
@@ -318,77 +323,78 @@ def abuse():
                 image_signed_url="static/img/temp-image/no-image.jpeg"
             qdict["image_signed_url"] = image_signed_url
             print(image_signed_url)
-            listTohtml.append(qdict.copy())
+            session['abuseListToHTML'].append(qdict.copy())
 
 
-        return render_template('Abuse_questions_activities.html', questions=listTohtml, username=session['email'])
+        return render_template('Abuse_questions_activities.html', questions=session['abuseListToHTML'], username=session['email'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
 
 @app.route('/branactivities-view', methods=['GET', 'POST'])
 def expand_brand():
-    selected_row = request.args.get('row_id')
-    brand_id = request.args.get('brand_id')
-    brandname = request.args.get('brandname')
-    branddescription = request.args.get('branddescription')
-    brandcategory = request.args.get('brandcategory')
-    brandtype = request.args.get('brandtype')
-    posted_by_user = request.args.get('posted_by_user')
-    brandemail = request.args.get('brandemail')
-    brandweb = request.args.get('brandweb')
-    print(brandname)
-    if request.method == 'POST' and 'decision' in request.form:
-        decision = request.form['decision']
-        brand_ref = fire_db.collection(u'brands').document(brand_id)
-        if 'reject' in request.form:
-            # return redirect(url_for('login'))
-            print("Reject clicked")
+    if 'loggedin' in session:
+        selected_row = request.args.get('row_id')
+        brand_id = request.args.get('brand_id')
+        brandname = request.args.get('brandname')
+        branddescription = request.args.get('branddescription')
+        brandcategory = request.args.get('brandcategory')
+        brandtype = request.args.get('brandtype')
+        posted_by_user = request.args.get('posted_by_user')
+        brandemail = request.args.get('brandemail')
+        brandweb = request.args.get('brandweb')
+        print(brandname)
+        if request.method == 'POST' and 'decision' in request.form:
+            decision = request.form['decision']
+            brand_ref = fire_db.collection(u'brands').document(brand_id)
+            if 'reject' in request.form:
+                # return redirect(url_for('login'))
+                print("Reject clicked")
 
-            update_data = {
-                u'active': False,
-                u'status_change_dt': firestore.SERVER_TIMESTAMP,
-                u'decision': "rejected",
-                u'decision_reason': decision
-            }
-            brand_ref.update(update_data)
+                update_data = {
+                    u'active': False,
+                    u'status_change_dt': firestore.SERVER_TIMESTAMP,
+                    u'decision': "rejected",
+                    u'decision_reason': decision
+                }
+                brand_ref.update(update_data)
 
-            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+                rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
 
-            # if not rbrand:
-            # return jsonify({'message': 'No pulse found to update!'}), 204
+                # if not rbrand:
+                # return jsonify({'message': 'No pulse found to update!'}), 204
 
-            rbrand.active = False
-            rbrand.decision = "rejected"
-            rbrand.decision_reason = decision
-            rbrand.status_change_dt = datetime.datetime.utcnow()
-            rbrand.modified_by = session['email']
-            db.session.commit()
+                rbrand.active = False
+                rbrand.decision = "rejected"
+                rbrand.decision_reason = decision
+                rbrand.status_change_dt = datetime.datetime.utcnow()
+                rbrand.modified_by = session['email']
+                db.session.commit()
 
-            return redirect(url_for('home'))
+                return redirect(url_for('home'))
 
-        if 'approve' in request.form:
-            print("Approve clicked")
+            if 'approve' in request.form:
+                print("Approve clicked")
 
-            update_data = {
-                u'active': True,
-                u'status_change_dt': firestore.SERVER_TIMESTAMP,
-                u'decision': "approved",
-                u'decision_reason': decision
-            }
-            brand_ref.update(update_data)
-            rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
+                update_data = {
+                    u'active': True,
+                    u'status_change_dt': firestore.SERVER_TIMESTAMP,
+                    u'decision': "approved",
+                    u'decision_reason': decision
+                }
+                brand_ref.update(update_data)
+                rbrand = new_brand_requests.query.filter_by(brand_id=brand_id).first()
 
-            # if not rbrand:
-            # return jsonify({'message': 'No pulse found to update!'}), 204
-            rbrand.active = True
-            rbrand.decision = "approved"
-            rbrand.decision_reason = decision
-            rbrand.status_change_dt = datetime.datetime.utcnow()
-            rbrand.modified_by = session['email']
-            db.session.commit()
-            return redirect(url_for('home'))
-        print(decision)
+                # if not rbrand:
+                # return jsonify({'message': 'No pulse found to update!'}), 204
+                rbrand.active = True
+                rbrand.decision = "approved"
+                rbrand.decision_reason = decision
+                rbrand.status_change_dt = datetime.datetime.utcnow()
+                rbrand.modified_by = session['email']
+                db.session.commit()
+                return redirect(url_for('home'))
+            print(decision)
 
     return render_template('expand_brand.html', selected_row=selected_row, brand_id=brand_id, brandname=brandname,
                            branddescription=branddescription, brandcategory=brandcategory, brandtype=brandtype,
@@ -398,68 +404,72 @@ def expand_brand():
 
 @app.route('/abuseactivities-view', methods=['GET', 'POST'])
 def expand_abuse():
-    qid = request.args.get('qid')
-    user_id = request.args.get('user_id')
-    question = request.args.get('question')
-    category = request.args.get('category')
-    totalvote = request.args.get('totalvote')
-    upvote = request.args.get('upvote')
-    reportabuse = request.args.get('reportabuse')
-    status = request.args.get('active')
-    question_type = request.args.get('question_type')
-    image_signed_url = request.args.get('image_signed_url')
+    if 'loggedin' in session:
+        qid = request.args.get('qid')
+        user_id = request.args.get('user_id')
+        question = request.args.get('question')
+        category = request.args.get('category')
+        totalvote = request.args.get('totalvote')
+        upvote = request.args.get('upvote')
+        reportabuse = request.args.get('reportabuse')
+        status = request.args.get('active')
+        question_type = request.args.get('question_type')
+        image_signed_url = request.args.get('image_signed_url')
 
-    if request.method == 'POST' and 'decision' in request.form:
-        decision = request.form['decision']
-        abuse_ref = fire_db.collection(u'questions').document(qid)
-        if 'reject' in request.form:
-            # return redirect(url_for('login'))
-            print("Inactive clicked")
+        if request.method == 'POST' and 'decision' in request.form:
+            decision = request.form['decision']
+            #Remove the item which is actioned from the screen
+            session['abuseListToHTML'] = [item for item in session['abuseListToHTML'] if item['qid'] == qid]
+            abuse_ref = fire_db.collection(u'questions').document(qid)
+            if 'reject' in request.form:
+                # return redirect(url_for('login'))
+                print("Inactive clicked")
 
-            update_data = {
-                u'active': False,
-                u'active_change_dt': firestore.SERVER_TIMESTAMP,
-                u'abuse_verified':True,
-                u'active_change_madeby': session['email'],
-                u'inactive_reason': decision
-            }
-            abuse_ref.update(update_data)
+                update_data = {
+                    u'active': False,
+                    u'active_change_dt': firestore.SERVER_TIMESTAMP,
+                    u'abuse_verified':True,
+                    u'active_change_madeby': session['email'],
+                    u'inactive_reason': decision
+                }
+                abuse_ref.update(update_data)
 
-            return redirect(url_for('home'))
+                return redirect(url_for('home'))
 
-        if 'reject-user' in request.form:
-            # return redirect(url_for('login'))
-            print("Inactive user clicked")
+            if 'reject-user' in request.form:
+                # return redirect(url_for('login'))
+                print("Inactive user clicked")
+                #Disable the question
+                update_data = {
+                    u'active': False,
+                    u'active_change_dt': firestore.SERVER_TIMESTAMP,
+                    u'abuse_verified': True,
+                    u'active_change_madeby': session['email'],
+                    u'inactive_reason': decision
+                }
+                abuse_ref.update(update_data)
+                #Stop the user to post the question
+                user_ref = fire_db.collection(u'users').document(user_id)
+                update_user_data = {
+                    u'canCreatePolls': False
+                }
+                user_ref.update(update_user_data)
+                return redirect(url_for('home'))
 
-            update_data = {
-                u'active': False,
-                u'active_change_dt': firestore.SERVER_TIMESTAMP,
-                u'abuse_verified':True,
-                u'active_change_madeby': session['email'],
-                u'inactive_reason': decision
-            }
-            abuse_ref.update(update_data)
-            #Stop the user to post the question
-            user_ref = fire_db.collection(u'users').document(user_id)
-            update_user_data = {
-                u'canCreatePolls': False
-            }
-            user_ref.update(update_user_data)
-            return redirect(url_for('home'))
+            if 'approve' in request.form:
+                print("Approve clicked")
 
-        if 'approve' in request.form:
-            print("Approve clicked")
-
-            update_data = {
-                u'active': True,
-                u'active_change_dt': firestore.SERVER_TIMESTAMP,
-                u'abuse_verified': True,
-                u'active_change_madeby': session['email'],
-                u'inactive_reason': decision
-            }
-            abuse_ref.update(update_data)
-            return redirect(url_for('home'))
-        print(decision)
+                update_data = {
+                    u'active': True,
+                    u'active_change_dt': firestore.SERVER_TIMESTAMP,
+                    u'abuse_verified': True,
+                    u'active_change_madeby': session['email'],
+                    u'inactive_reason': decision
+                }
+                abuse_ref.update(update_data)
+                #return redirect(url_for('home'))
+                return render_template('Abuse_questions_activities.html', questions=session['abuseListToHTML'], username=session['email'])
+            print(decision)
 
     return render_template('expand_abuse.html',   qid = qid,  user_id = user_id,question = question,category = category, totalvote = totalvote,upvote = upvote,reportabuse = reportabuse,status = status, question_type = question_type, image_signed_url=image_signed_url)
 
@@ -481,3 +491,4 @@ if __name__ == '__main__':
     session_id = -1
     session_email = ''
     app.run(debug=True)
+
