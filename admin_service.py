@@ -183,6 +183,7 @@ def login():
 
 @app.route('/otp', methods=['GET', 'POST'])
 def otp_verify():
+    
     # To check whether an email validated
     print(session['valid_email'])
     if session['valid_email'] == False:
@@ -228,6 +229,8 @@ def otp_verify():
 @app.route('/admin/logout')
 def logout():
     # Remove session data, this will log the user out
+    session.clear()
+    #response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
     session['valid_email'] = False
     session['loggedin'] = False
     session.pop('loggedin', None)
@@ -235,7 +238,7 @@ def logout():
     session.pop('id', None)
     session.pop('email', None)
     # Redirect to login page
-    return redirect(url_for('login'))
+    return  redirect(url_for('login'))
 
 
 # http://localhost:5000/pythinlogin/register - this will be the registration page, we need to use both GET and POST requests
