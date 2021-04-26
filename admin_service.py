@@ -183,7 +183,7 @@ def login():
 
 @app.route('/otp', methods=['GET', 'POST'])
 def otp_verify():
-    
+
     # To check whether an email validated
     print(session['valid_email'])
     if session['valid_email'] == False:
@@ -491,7 +491,8 @@ def profile():
 
 
 if __name__ == '__main__':
+    debug = bool(config['DEBUG']['DEBUG'])
     session_id = -1
     session_email = ''
-    app.run(debug=True)
+    app.run(debug=debug)
 
